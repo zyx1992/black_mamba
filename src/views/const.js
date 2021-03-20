@@ -64,3 +64,8 @@ export const stars = {
   二星: 2,
   一星: 1,
 }
+
+// 充值状态
+export const chargeStatus = {
+  充值中: 1,
+}
