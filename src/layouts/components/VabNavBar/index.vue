@@ -14,12 +14,10 @@
       </el-col>
       <el-col :xs="20" :sm="12" :md="12" :lg="12" :xl="12">
         <div class="right-panel">
+          <router-link class="fe" to="/task/add">发布任务</router-link>
+          <router-link class="fe" to="/wallet/recharge">充值</router-link>
+          <router-link class="fe" to="/">帮助</router-link>
           <vab-avatar />
-          <vab-icon
-            title="退出系统"
-            :icon="['fas', 'sign-out-alt']"
-            @click="logout"
-          />
         </div>
       </el-col>
     </el-row>
@@ -90,7 +88,13 @@
       align-items: center;
       justify-content: flex-end;
       height: $base-nav-bar-height;
-
+      .fe {
+        margin-right: 32px;
+        &:hover {
+          color: #1890ff;
+          font-weight: bold;
+        }
+      }
       ::v-deep {
         svg {
           width: 1em;

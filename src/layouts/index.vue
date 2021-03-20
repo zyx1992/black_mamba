@@ -17,7 +17,6 @@
       <div class="vab-main" :class="collapse ? 'is-collapse-main' : ''">
         <div :class="header === 'fixed' ? 'fixed-header' : ''">
           <vab-nav-bar />
-          <vab-tabs-bar v-if="tabsBar === 'true' || tabsBar === true" />
         </div>
         <vab-app-main />
       </div>
@@ -57,11 +56,6 @@
     mounted() {
       this.oldLayout = this.layout
       const userAgent = navigator.userAgent
-      if (userAgent.includes('Juejin')) {
-        this.$baseAlert(
-          'vue-admin-beautiful不支持在掘金内置浏览器演示，请手动复制以下地址到浏览器中查看http://mpfhrd48.sanxing.uz7.cn/vue-admin-beautiful'
-        )
-      }
       const isMobile = this.handleIsMobile()
       if (isMobile) {
         if (isMobile) {
@@ -132,48 +126,6 @@
     width: 100%;
     height: 100%;
 
-    .layout-container-horizontal {
-      position: relative;
-
-      &.fixed {
-        padding-top: calc(#{$base-top-bar-height} + #{$base-tabs-bar-height});
-      }
-
-      &.fixed.no-tabs-bar {
-        padding-top: $base-top-bar-height;
-      }
-
-      ::v-deep {
-        .vab-main {
-          width: 88%;
-          margin: auto;
-        }
-
-        .fixed-header {
-          @include fix-header;
-        }
-
-        .tag-view-show {
-          background: $base-color-white;
-          box-shadow: $base-box-shadow;
-        }
-
-        .nav-bar-container {
-          .fold-unfold {
-            display: none;
-          }
-        }
-
-        .main-padding {
-          .app-main-container {
-            margin-top: $base-padding;
-            margin-bottom: $base-padding;
-            background: $base-color-white;
-          }
-        }
-      }
-    }
-
     .layout-container-vertical {
       position: relative;
 
@@ -192,7 +144,7 @@
       }
 
       &.fixed {
-        padding-top: calc(#{$base-nav-bar-height} + #{$base-tabs-bar-height});
+        padding-top: calc(#{$base-nav-bar-height});
       }
 
       &.fixed.no-tabs-bar {
