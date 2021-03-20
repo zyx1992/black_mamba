@@ -69,7 +69,7 @@ export const asyncRoutes = [
       {
         path: 'add',
         name: 'add',
-        component: () => import('@/views/mall/pay/index'),
+        component: () => import('@/views/task/list/add'),
         meta: {
           title: '任务发布',
           noKeepAlive: true,
@@ -79,7 +79,7 @@ export const asyncRoutes = [
       {
         path: 'list',
         name: 'list',
-        component: () => import('@/views/mall/goodsList/index'),
+        component: () => import('@/views/task/list/index'),
         meta: {
           title: '任务列表',
         },
@@ -87,10 +87,10 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: '/bill',
+    path: '/wallet',
     component: Layout,
     redirect: 'noRedirect',
-    name: 'bill',
+    name: 'wallet',
     meta: {
       title: '钱包管理',
       icon: 'shopping-cart',
@@ -101,7 +101,7 @@ export const asyncRoutes = [
       {
         path: 'recharge',
         name: 'recharge',
-        component: () => import('@/views/mall/pay/index'),
+        component: () => import('@/views/wallet/charge/recharge'),
         meta: {
           title: '充值中心',
           noKeepAlive: true,
@@ -111,7 +111,7 @@ export const asyncRoutes = [
       {
         path: 'rechargeList',
         name: 'rechargeList',
-        component: () => import('@/views/mall/goodsList/index'),
+        component: () => import('@/views/wallet/charge/index'),
         meta: {
           title: '充值明细',
         },
@@ -119,7 +119,7 @@ export const asyncRoutes = [
       {
         path: 'consumeList',
         name: 'consumeList',
-        component: () => import('@/views/mall/goodsList/index'),
+        component: () => import('@/views/wallet/consume/index'),
         meta: {
           title: '消耗明细',
         },
@@ -131,6 +131,7 @@ export const asyncRoutes = [
     component: EmptyLayout,
     redirect: 'noRedirect',
     name: 'Error',
+    hidden: true,
     meta: { title: '错误页', icon: 'bug' },
     children: [
       {

@@ -1,31 +1,6 @@
 <template>
   <div class="vue-admin-beautiful-wrapper" :class="classObj">
     <div
-      v-if="'horizontal' === layout"
-      class="layout-container-horizontal"
-      :class="{
-        fixed: header === 'fixed',
-        'no-tabs-bar': tabsBar === 'false' || tabsBar === false,
-      }"
-    >
-      <div :class="header === 'fixed' ? 'fixed-header' : ''">
-        <vab-top-bar />
-        <div
-          v-if="tabsBar === 'true' || tabsBar === true"
-          :class="{ 'tag-view-show': tabsBar }"
-        >
-          <div class="vab-main">
-            <vab-tabs-bar />
-          </div>
-        </div>
-      </div>
-      <div class="vab-main main-padding">
-        <vab-ad />
-        <vab-app-main />
-      </div>
-    </div>
-    <div
-      v-else
       class="layout-container-vertical"
       :class="{
         fixed: header === 'fixed',
@@ -37,13 +12,13 @@
         class="mask"
         @click="handleFoldSideBar"
       />
+      <!--右侧目录-->
       <vab-side-bar />
       <div class="vab-main" :class="collapse ? 'is-collapse-main' : ''">
         <div :class="header === 'fixed' ? 'fixed-header' : ''">
           <vab-nav-bar />
           <vab-tabs-bar v-if="tabsBar === 'true' || tabsBar === true" />
         </div>
-        <vab-ad />
         <vab-app-main />
       </div>
     </div>
