@@ -73,6 +73,7 @@
       margin: $base-padding;
     }
     .app-main-height {
+      padding: 20px;
       min-height: $base-app-main-height;
     }
 

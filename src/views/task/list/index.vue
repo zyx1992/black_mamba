@@ -132,7 +132,6 @@
 
 <style lang="scss" scoped>
   .ma-task-list {
-    padding: 20px;
     .ma-task-search {
       .search-item {
         margin-top: 10px;
