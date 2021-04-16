@@ -43,26 +43,6 @@
               <vab-icon slot="prefix" :icon="['fas', 'mobile-alt']"></vab-icon>
             </el-input>
           </el-form-item>
-          <el-form-item prop="phoneCode" style="position: relative">
-            <el-input
-              v-model.trim="form.phoneCode"
-              type="text"
-              placeholder="手机验证码"
-            >
-              <vab-icon
-                slot="prefix"
-                :icon="['fas', 'envelope-open']"
-              ></vab-icon>
-            </el-input>
-            <el-button
-              type="primary"
-              class="show-pwd phone-code"
-              :disabled="isGetphone"
-              @click="getPhoneCode"
-            >
-              {{ phoneCode }}
-            </el-button>
-          </el-form-item>
           <el-form-item prop="password">
             <el-input
               v-model.trim="form.password"
@@ -93,6 +73,7 @@
 <script>
   import { isPassword, isPhone } from '@/utils/validate'
   import { register } from '@/api/user'
+  import { getUserRsa } from '@/api/ma/common'
   export default {
     username: 'Register',
     directives: {
@@ -190,10 +171,14 @@
               username: this.form.username,
               phone: this.form.phone,
               password: this.form.password,
-              phoneCode: this.form.phoneCode,
+              useType: 2
             }
-            const { msg } = await register(param)
-            this.$baseMessage(msg, 'success')
+            getUserRsa({username: this.form.username}).then(res => {
+              console.log('===valid', param)
+              console.log('==res', res)
+            })
+//            const { msg } = await register(param)
+//            this.$baseMessage(msg, 'success')
           }
         })
       },

@@ -53,7 +53,13 @@ module.exports = {
       warnings: true,
       errors: true,
     },
-    after: mockServer(),
+    proxy: {
+      '/' : {
+        target: 'https://dev23.liuzhicong.cn',
+        secure: false,
+        logLevel: 'debug',
+      }
+    }
   },
   configureWebpack() {
     return {
