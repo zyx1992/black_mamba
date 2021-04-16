@@ -54,12 +54,12 @@ module.exports = {
       errors: true,
     },
     proxy: {
-      '/' : {
+      '/': {
         target: 'https://dev23.liuzhicong.cn',
         secure: false,
         logLevel: 'debug',
-      }
-    }
+      },
+    },
   },
   configureWebpack() {
     return {

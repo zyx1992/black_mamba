@@ -1,12 +1,5 @@
 <template>
   <div class="register-container">
-    <el-alert
-      v-if="nodeEnv !== 'development'"
-      title="beautiful boys and girls欢迎加入vue-admin-beautifulQQ群：972435319"
-      type="success"
-      :closable="false"
-      style="position: fixed"
-    ></el-alert>
     <el-row>
       <el-col :xs="24" :sm="24" :md="12" :lg="16" :xl="16">
         <div style="color: transparent">占位符</div>
@@ -71,9 +64,10 @@
   </div>
 </template>
 <script>
-  import { isPassword, isPhone } from '@/utils/validate'
+  import { isPassword, isPhone } from '@/utils/ma/validate'
   import { register } from '@/api/user'
-  import { getUserRsa } from '@/api/ma/common'
+  import { getUserRsa, signup } from '@/api/ma/common'
+  import { handleRsaPassword } from '@/utils/ma/utils'
   export default {
     username: 'Register',
     directives: {
@@ -99,6 +93,7 @@
         }
       }
       const validatePhone = (rule, value, callback) => {
+        if (!value) return callback()
         if (!isPhone(value)) {
           callback(new Error('请输入正确的手机号'))
         } else {
@@ -106,33 +101,23 @@
         }
       }
       return {
-        isGetphone: false,
         getPhoneIntval: null,
-        phoneCode: '获取验证码',
         showRegister: false,
-        nodeEnv: process.env.NODE_ENV,
         title: this.$baseTitle,
         form: {},
         registerRules: {
           username: [
             { required: true, trigger: 'blur', message: '请输入用户名' },
-            { max: 20, trigger: 'blur', message: '最多不能超过20个字' },
+            { min: 6, trigger: 'blur', message: '用户名最少6位' },
             { validator: validateusername, trigger: 'blur' },
           ],
-          phone: [
-            { required: true, trigger: 'blur', message: '请输入手机号码' },
-            { validator: validatePhone, trigger: 'blur' },
-          ],
+          phone: [{ validator: validatePhone, trigger: 'blur' }],
           password: [
             { required: true, trigger: 'blur', message: '请输入密码' },
             { validator: validatePassword, trigger: 'blur' },
           ],
-          phoneCode: [
-            { required: true, trigger: 'blur', message: '请输入手机验证码' },
-          ],
         },
         loading: false,
-        passwordType: 'password',
       }
     },
     created() {
@@ -144,41 +129,20 @@
       clearInterval(this.getPhoneIntval)
     },
     methods: {
-      getPhoneCode() {
-        if (!isPhone(this.form.phone)) {
-          //this.$baseMessage('请输入手机号', 'error')
-          this.$refs['registerForm'].validateField('phone')
-          return
-        }
-        this.isGetphone = true
-        let n = 60
-        this.getPhoneIntval = setInterval(() => {
-          if (n > 0) {
-            n--
-            this.phoneCode = '重新获取(' + n + 's)'
-          } else {
-            this.getPhoneIntval = null
-            clearInterval(this.getPhoneIntval)
-            this.phoneCode = '获取验证码'
-            this.isGetphone = false
-          }
-        }, 1000)
-      },
       handleReister() {
         this.$refs['registerForm'].validate(async (valid) => {
           if (valid) {
+            let { signKey } = await getUserRsa({ username: this.form.username })
+            let password = encodeURIComponent(
+              handleRsaPassword(signKey, this.form.username)
+            )
             const param = {
               username: this.form.username,
-              phone: this.form.phone,
-              password: this.form.password,
-              useType: 2
+              mobile: this.form.phone,
+              password: password,
+              userType: '2',
             }
-            getUserRsa({username: this.form.username}).then(res => {
-              console.log('===valid', param)
-              console.log('==res', res)
-            })
-//            const { msg } = await register(param)
-//            this.$baseMessage(msg, 'success')
+            let res = await signup(param)
           }
         })
       },

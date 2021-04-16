@@ -11,25 +11,31 @@ const headers = {}
 const Axios = axios.create({
   timeout: 10000,
   baseURL: '/',
-  headers: headers
+  headers: headers,
 })
 Axios.defaults.withCredentials = true
 
-Axios.interceptors.request.use(config => {
-  return config
-}, error => {
-  return Promise.error(error)
-})
-
-Axios.interceptors.response.use(response => {
-  const res = response.data
-  if (res.errno === 0) {
-    return res
-  } else {
-    return Promise.reject(res)
+Axios.interceptors.request.use(
+  (config) => {
+    return config
+  },
+  (error) => {
+    return Promise.error(error)
   }
-}, error => {
-  return Promise.reject(error)
-})
+)
+
+Axios.interceptors.response.use(
+  (response) => {
+    const res = response.data
+    if (res.code === 200) {
+      return res
+    } else {
+      return Promise.reject(res)
+    }
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 export default Axios
