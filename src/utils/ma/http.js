@@ -28,8 +28,9 @@ $http.post = (url = '', params = {}, config = {}) => {
         resolve(res.data)
       })
       .catch((err) => {
+        console.log('==catch err', err)
         Message({
-          message: err.errmsg,
+          message: err,
           type: 'error',
           duration: 5 * 1000,
         })

@@ -26,11 +26,12 @@ Axios.interceptors.request.use(
 
 Axios.interceptors.response.use(
   (response) => {
+    console.log('===res', response)
     const res = response.data
     if (res.code === 200) {
       return res
     } else {
-      return Promise.reject(res)
+      return Promise.reject(res.message)
     }
   },
   (error) => {

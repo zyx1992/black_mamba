@@ -69,6 +69,9 @@
 
 <script>
   import { isPassword } from '@/utils/validate'
+  import { getUserRsa, singin } from '@/api/ma/common'
+  import { handleRsaPassword } from '@/utils/ma/utils'
+  import { title } from '@/config'
 
   export default {
     name: 'Login',
@@ -95,11 +98,11 @@
         }
       }
       return {
-        nodeEnv: process.env.NODE_ENV,
         title: this.$baseTitle,
         form: {
           username: '',
           password: '',
+          userType: '2',
         },
         rules: {
           username: [
@@ -136,34 +139,26 @@
     beforeDestroy() {
       document.body.style.overflow = 'auto'
     },
-    mounted() {
-      this.form.username = 'admin'
-      this.form.password = '123456'
-    },
     methods: {
       handlePassword() {
-        this.passwordType === 'password'
-          ? (this.passwordType = '')
-          : (this.passwordType = 'password')
         this.$nextTick(() => {
           this.$refs.password.focus()
         })
       },
       handleLogin() {
-        this.$refs.form.validate((valid) => {
+        this.$refs.form.validate(async (valid) => {
           if (valid) {
             this.loading = true
-            this.$store
-              .dispatch('user/login', this.form)
-              .then(() => {
-                const routerPath =
-                  this.redirect === '/404' || this.redirect === '/401'
-                    ? '/'
-                    : this.redirect
-                this.$router.push(routerPath).catch(() => {})
-                this.loading = false
+            let { signKey } = await getUserRsa({ username: this.form.username })
+            this.form.password = encodeURIComponent(
+              handleRsaPassword(signKey, this.form.password)
+            )
+            singin(this.form)
+              .then((res) => {
+                this.$baseNotify(`欢迎登录${title}`)
+                this.$store.commit('common/setAccessToken', res['access_token'])
               })
-              .catch(() => {
+              .finally(() => {
                 this.loading = false
               })
           } else {

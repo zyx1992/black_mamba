@@ -134,7 +134,7 @@
           if (valid) {
             let { signKey } = await getUserRsa({ username: this.form.username })
             let password = encodeURIComponent(
-              handleRsaPassword(signKey, this.form.username)
+              handleRsaPassword(signKey, this.form.password)
             )
             const param = {
               username: this.form.username,
