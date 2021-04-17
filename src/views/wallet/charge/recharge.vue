@@ -1,17 +1,18 @@
 <template>
   <div class="ma-recharge">
-    <el-card class="recharge-overview">
+    <el-card v-loading="loading" class="recharge-overview">
       <div class="card-item">
         本金余额：
         <span class="point">{{ total }}</span>
         元
-        <el-button>充值</el-button>
       </div>
       <div class="card-item">
         冻结本金：{{ frezze }}元（查看详细说明）
         <span>
           <el-button>提现</el-button>
-          <el-button>充值明细</el-button>
+          <el-button @click="$router.push('/wallet/rechargeList')">
+            充值明细
+          </el-button>
         </span>
       </div>
     </el-card>
@@ -28,9 +29,18 @@
         </ol>
       </div>
       <div class="main">
-        <el-form v-model="formData" label-width="100px" label-position="left">
-          <el-form-item label="充值金额">
-            <el-input placeholder="请输入充值金额（元）"></el-input>
+        <el-form
+          ref="payForm"
+          :model="formData"
+          :rules="rules"
+          label-width="110px"
+          label-position="left"
+        >
+          <el-form-item label="充值金额" prop="topUpAmount">
+            <el-input
+              v-model="query.topUpAmount"
+              placeholder="请输入充值金额（元）"
+            ></el-input>
             <div>最少充值金额20元</div>
           </el-form-item>
           <el-form-item label="今日汇率">
@@ -42,15 +52,29 @@
           <el-form-item label="充值方式">
             <div>图</div>
           </el-form-item>
-          <el-form-item label="付款账号">
-            <el-input placeholder="请输入付款账号"></el-input>
+          <el-form-item label="付款账号" prop="paymentAccount">
+            <el-input
+              v-model="query.paymentAccount"
+              placeholder="请输入付款账号"
+            ></el-input>
           </el-form-item>
-          <el-form-item label="支付宝订单号">
-            <el-input placeholder="请输入支付宝订单号"></el-input>
+          <el-form-item label="支付宝订单号" prop="paymentOrderNo">
+            <el-input
+              v-model="query.paymentOrderNo"
+              placeholder="请输入支付宝订单号"
+            ></el-input>
           </el-form-item>
           <el-form-item>
             <el-button size="medium">取消</el-button>
-            <el-button size="medium" type="primary">提交</el-button>
+            <el-button
+              size="medium"
+              type="primary"
+              :disabled="btnLoading"
+              :loading="btnLoading"
+              @click="handleSubmit"
+            >
+              提交
+            </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -59,6 +83,7 @@
 </template>
 
 <script>
+  import { getUserAccount, setPayment } from '@/api/ma/wallet'
   export default {
     name: 'Recharge',
     data() {
@@ -67,7 +92,68 @@
         frezze: 10,
         formData: {},
         rate: 6.8,
+        loading: false,
+        btnLoading: false,
+        query: {
+          topUpAmount: null,
+          paymentAccount: '',
+          paymentOrderNo: '',
+        },
+        rules: {
+          topUpAmount: [
+            {
+              required: true,
+              trigger: 'blur',
+              min: 20,
+              message: '充值金额不能小于20元',
+            },
+          ],
+          paymentAccount: [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请输入付款账号',
+            },
+          ],
+          paymentOrderNo: [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请输入支付宝订单号',
+            },
+          ],
+        },
       }
+    },
+    mounted() {
+      this.getUserInfo()
+    },
+    methods: {
+      getUserInfo() {
+        this.loading = true
+        getUserAccount()
+          .then((res) => {
+            this.total = res.balance || 0
+            this.frezze = res.freezeAmount || 0
+          })
+          .finally((_) => {
+            this.loading = false
+          })
+      },
+      async handleSubmit() {
+        this.$refs.payForm.validate(async (valid) => {
+          if (valid) {
+            this.btnLoading = true
+            setPayment(this.query)
+              .then((res) => {
+                this.getUserInfo()
+              })
+              .finally((_) => {
+                this.btnLoading = false
+              })
+          }
+        })
+      },
     },
   }
 </script>
