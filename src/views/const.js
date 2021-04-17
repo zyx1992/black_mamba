@@ -67,7 +67,9 @@ export const stars = {
 
 // 充值状态
 export const chargeStatus = {
-  充值中: 1,
+  0: '待审核',
+  1: '审核通过',
+  2: '审核拒绝',
 }
 
 // 任务列表

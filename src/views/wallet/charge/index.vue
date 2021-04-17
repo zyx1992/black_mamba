@@ -5,7 +5,7 @@
         <el-col :span="12">
           付款账号
           <el-input
-            v-model="query.order"
+            v-model="query.paymentAccount"
             size="medium"
             placeholder="请填写付款账号"
           ></el-input>
@@ -13,7 +13,7 @@
         <el-col :span="12">
           支付宝订单号
           <el-input
-            v-model="query.code"
+            v-model="query.paymentOrderNo"
             size="medium"
             placeholder="请填写支付宝订单号"
           ></el-input>
@@ -22,17 +22,17 @@
       <el-row class="search-item">
         <el-col :span="12">
           状态类型
-          <el-select v-model="query.status">
+          <el-select v-model="query.isConfirm">
             <el-option
-              v-for="item in $options.chargeStatus"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              v-for="item in Object.keys($options.chargeStatus)"
+              :key="item"
+              :label="$options.chargeStatus[item]"
+              :value="item"
             ></el-option>
           </el-select>
         </el-col>
         <el-col :span="12">
-          <el-button class="search-btn" type="primary" @click="handlerSearch">
+          <el-button class="search-btn" type="primary" @click="getList">
             查询
           </el-button>
         </el-col>
@@ -40,14 +40,23 @@
     </div>
     <div class="ma-bill-table">
       <el-table v-loading="loading" :data="list" border>
-        <el-table-column prop="id" label="付款账号"></el-table-column>
-        <el-table-column prop="count" label="支付宝订单号"></el-table-column>
-        <el-table-column prop="name" label="店铺名称"></el-table-column>
-        <el-table-column prop="pay" label="充值人民币"></el-table-column>
-        <el-table-column prop="pay" label="到账本金"></el-table-column>
-        <el-table-column prop="pay" label="充值状态"></el-table-column>
-        <el-table-column prop="pay" label="充值时间"></el-table-column>
-        <el-table-column prop="pay" label="审核时间"></el-table-column>
+        <el-table-column
+          prop="paymentAccount"
+          label="付款账号"
+        ></el-table-column>
+        <el-table-column prop="paymentOrderNo" label="订单号"></el-table-column>
+        <el-table-column prop="username" label="充值人"></el-table-column>
+        <el-table-column
+          prop="paymentAmount"
+          label="付款金额"
+        ></el-table-column>
+        <el-table-column prop="isConfirm" label="充值状态">
+          <template slot-scope="scope">
+            {{ $options.chargeStatus[scope.row.isConfirm] }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="充值时间"></el-table-column>
+        <el-table-column prop="updatedAt" label="审核时间"></el-table-column>
       </el-table>
       <el-pagination
         :current-page.sync="query.page"
@@ -64,6 +73,7 @@
 <script>
   import { getTaskType, getTaskList, deleteTask } from '@/api/ma/task'
   import { chargeStatus } from '../../const'
+  import { getRechargeList } from '@/api/ma/wallet'
   export default {
     name: 'Charge',
     chargeStatus,
@@ -74,36 +84,28 @@
         query: {
           page: 1,
           pageSize: 10,
-          order: '',
-          code: '',
-          status: '',
+          userType: 2,
+          isConfirm: 0,
+          paymentAccount: '',
+          paymentOrderNo: '',
         },
-        typeList: [],
         loading: false,
-        btnLoading: false,
       }
     },
     created() {
-      this.getTaskTypes()
-      this.getTaskList()
+      this.getList()
     },
     methods: {
-      async getTaskTypes() {
-        this.typeList = await getTaskType()
-      },
-      async getTaskList() {
+      async getList() {
         this.loading = true
-        this.list = await getTaskList()
-        this.loading = false
-      },
-      handlerSearch() {
-        console.log('===query', this.query)
-      },
-      handleViewDetail(row) {},
-      async handleDelete(row) {
-        this.btnLoading = true
-        await deleteTask()
-        this.btnLoading = false
+        getRechargeList(this.query)
+          .then((res) => {
+            this.list = (res && res[0] && res[0].data) || []
+            this.total = (res && res[0] && res[0].count) || 0
+          })
+          .finally((_) => {
+            this.loading = false
+          })
       },
       handleSizeChange(val) {
         this.query.pageSize = val
