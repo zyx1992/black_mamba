@@ -26,9 +26,11 @@ Axios.interceptors.request.use(
 
 Axios.interceptors.response.use(
   (response) => {
-    console.log('===res', response)
     const res = response.data
     if (res.code === 200) {
+      return res
+    } else if (res) {
+      // TODO: 临时兼容，记得删除
       return res
     } else {
       return Promise.reject(res.message)

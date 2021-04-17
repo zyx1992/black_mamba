@@ -5,7 +5,7 @@
         <el-col :span="8">
           店铺名称
           <el-input
-            v-model="query.name"
+            v-model="query.storeName"
             size="medium"
             placeholder="请填写店铺名称"
           ></el-input>
@@ -13,33 +13,41 @@
         <el-col :span="8">
           产品编号
           <el-input
-            v-model="query.code"
+            v-model="query.itemcode"
             placeholder="请填写产品编号"
           ></el-input>
         </el-col>
         <el-col :span="8">
           订单编号
-          <el-input v-model="query.order" placeholder="请填订单号"></el-input>
+          <el-input v-model="query.taskId" placeholder="请填订单号"></el-input>
         </el-col>
       </el-row>
       <el-row class="search-item">
         <el-col :span="8">
           状态类型
-          <el-select v-model="query.type">
+          <el-select v-model="query.taskStatus">
             <el-option
-              v-for="item in typeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              v-for="item in Object.keys(typeList)"
+              :key="item"
+              :label="typeList[item]"
+              :value="item"
             ></el-option>
           </el-select>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="10">
           日期时间
-          <el-date-picker v-model="query.date"></el-date-picker>
+          <el-date-picker
+            v-model="query.date"
+            type="daterange"
+            range-separator="至"
+            value-format="timestamp"
+            :picker-options="pickerOptions"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          ></el-date-picker>
         </el-col>
-        <el-col :span="8">
-          <el-button class="search-btn" type="primary" @click="handlerSearch">
+        <el-col :span="6">
+          <el-button class="search-btn" type="primary" @click="getTaskList">
             查询
           </el-button>
         </el-col>
@@ -85,17 +93,27 @@
         list: [],
         total: 10,
         query: {
+          beginTime: '',
+          endTime: '',
+          itemcode: null,
+          limit: 10,
+          storeName: '',
+          taskId: '',
+          taskStatus: null,
+          userType: '2',
           page: 1,
           pageSize: 10,
-          name: '',
-          type: '',
-          code: '',
-          order: '',
           date: '',
         },
-        typeList: [],
+        typeList: {},
         loading: false,
         btnLoading: false,
+        pickerOptions: {
+          onPick: ({ maxDate, minDate }) => {
+            this.query.beginTime = new Date(minDate).getTime()
+            this.query.endTime = new Date(maxDate).getTime()
+          },
+        },
       }
     },
     created() {
@@ -104,15 +122,12 @@
     },
     methods: {
       async getTaskTypes() {
-        this.typeList = await getTaskType()
+        this.typeList = getTaskType()
       },
       async getTaskList() {
         this.loading = true
-        this.list = await getTaskList()
+        this.list = await getTaskList(this.query)
         this.loading = false
-      },
-      handlerSearch() {
-        console.log('===query', this.query)
       },
       handleViewDetail(row) {},
       async handleDelete(row) {

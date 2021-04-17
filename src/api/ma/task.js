@@ -1,14 +1,12 @@
-import request from '@/utils/request'
+import $http from '@/utils/ma/http.js'
+import { taskStatus } from '../../views/const'
 
-export function getTaskList(query) {
-  return [{ id: '1', count: 2, name: 'aaa', pay: 120, request: 'ssss' }]
+export function getTaskList(params) {
+  return $http.post('/task/list', params)
 }
 
 export function getTaskType() {
-  return [
-    { label: 'a', value: 1 },
-    { label: 'b', value: 1 },
-  ]
+  return taskStatus
 }
 
 export function deleteTask(id) {

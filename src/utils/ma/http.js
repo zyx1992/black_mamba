@@ -33,7 +33,7 @@ $http.post = (url = '', params = {}, config = {}) => {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
-    Axios.post(url, params, headers)
+    Axios.post(url, params, { headers })
       .then((res) => {
         resolve(res.data)
       })
