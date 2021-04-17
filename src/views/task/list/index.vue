@@ -55,15 +55,22 @@
     </div>
     <div class="ma-task-table">
       <el-table v-loading="loading" :data="list" border>
-        <el-table-column prop="id" label="任务ID"></el-table-column>
-        <el-table-column prop="count" label="任务数量"></el-table-column>
-        <el-table-column prop="name" label="店铺名称"></el-table-column>
-        <el-table-column prop="pay" label="任务费用"></el-table-column>
-        <el-table-column prop="pay" label="任务要求"></el-table-column>
-        <el-table-column prop="pay" label="订单号"></el-table-column>
-        <el-table-column prop="pay" label="任务状态"></el-table-column>
-        <el-table-column prop="pay" label="发布时间"></el-table-column>
-        <el-table-column prop="id" label="操作">
+        <el-table-column prop="taskId" label="任务ID"></el-table-column>
+        <el-table-column prop="taskCount" label="任务数量"></el-table-column>
+        <el-table-column prop="storeName" label="店铺名称"></el-table-column>
+        <el-table-column prop="totalAmount" label="任务费用"></el-table-column>
+        <el-table-column prop="routeReq" label="任务要求">
+          <template slot-scope="scope">
+            {{ $options.taskOriginRules[scope.row.routeReq] }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="taskStatus" label="任务状态">
+          <template slot-scope="scope">
+            {{ typeList[scope.row.taskStatus] }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="发布时间"></el-table-column>
+        <el-table-column label="操作">
           <template slot-scope="scope">
             <div class="operation" @click="handleViewDetail(scope.row)">
               详情
@@ -86,8 +93,10 @@
 
 <script>
   import { getTaskType, getTaskList, deleteTask } from '@/api/ma/task'
+  import { taskOriginRules } from '../../const'
   export default {
     name: 'List',
+    taskOriginRules,
     data() {
       return {
         list: [],
@@ -126,7 +135,10 @@
       },
       async getTaskList() {
         this.loading = true
-        this.list = await getTaskList(this.query)
+        let res = await getTaskList(this.query)
+        // TODO: res[0]需要替换
+        this.list = res && res[0] && res[0].list
+        this.total = res && res[0] && res[0].count
         this.loading = false
       },
       handleViewDetail(row) {},

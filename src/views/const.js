@@ -7,12 +7,12 @@ export const taskOrigins = {
   移动APP: 'mobile',
   电脑: 'web',
 }
-//来源需求
+//任务需求
 export const taskOriginRules = {
-  直接访问: 1,
-  站内搜索列表搜索: 2,
-  店铺内部搜索: 3,
-  活动URL: 4,
+  1: '直接访问',
+  2: '站内搜索列表搜索',
+  3: '店铺内搜索',
+  4: '活动URL',
 }
 //改价
 export const changePrices = {

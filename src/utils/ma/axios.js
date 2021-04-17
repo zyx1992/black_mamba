@@ -5,6 +5,7 @@
  */
 import axios from 'axios'
 import { getAccessToken } from '@/utils/ma/accessToken'
+import router from '@/router'
 
 // 请求头参数设置
 const headers = {}
