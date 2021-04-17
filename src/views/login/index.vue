@@ -157,6 +157,7 @@
               .then((res) => {
                 this.$baseNotify(`欢迎登录${title}`)
                 this.$store.commit('common/setAccessToken', res['access_token'])
+                this.$router.push(`/task`)
               })
               .finally(() => {
                 this.loading = false

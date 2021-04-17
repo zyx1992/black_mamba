@@ -1,9 +1,7 @@
-import request from '@/utils/request'
-
+// zhuyuxin
+import { asyncRoutes } from '../router/index'
 export function getRouterList(data) {
-  return request({
-    url: '/menu/navigate',
-    method: 'post',
-    data,
+  return new Promise((resolve) => {
+    resolve(asyncRoutes)
   })
 }

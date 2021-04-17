@@ -65,9 +65,10 @@
 </template>
 <script>
   import { isPassword, isPhone } from '@/utils/ma/validate'
-  import { register } from '@/api/user'
   import { getUserRsa, signup } from '@/api/ma/common'
   import { handleRsaPassword } from '@/utils/ma/utils'
+  import { title } from '@/config'
+
   export default {
     username: 'Register',
     directives: {
@@ -132,6 +133,7 @@
       handleReister() {
         this.$refs['registerForm'].validate(async (valid) => {
           if (valid) {
+            this.loading = true
             let { signKey } = await getUserRsa({ username: this.form.username })
             let password = encodeURIComponent(
               handleRsaPassword(signKey, this.form.password)
@@ -142,7 +144,14 @@
               password: password,
               userType: '2',
             }
-            let res = await signup(param)
+            signup(param)
+              .then((res) => {
+                this.$baseNotify(`欢迎登录${title}`)
+                this.$store.commit('common/setAccessToken', res['access_token'])
+              })
+              .finally((_) => {
+                this.loading = false
+              })
           }
         })
       },

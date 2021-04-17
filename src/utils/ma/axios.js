@@ -4,10 +4,12 @@
  * @date: 2019.11.27
  */
 import axios from 'axios'
+import { getAccessToken } from '@/utils/ma/accessToken'
 
 // 请求头参数设置
-const headers = {}
-
+const headers = {
+  Authorization: `Basic ${getAccessToken('access_token')}`,
+}
 const Axios = axios.create({
   timeout: 10000,
   baseURL: '/',

@@ -24,7 +24,7 @@ export const constantRoutes = [
   {
     path: '/401',
     name: '401',
-    component: () => import('@/views/401'),
+    component: (a) => import('@/views/401'),
     hidden: true,
   },
   {
@@ -161,7 +161,7 @@ const router = new VueRouter({
   scrollBehavior: () => ({
     y: 0,
   }),
-  routes: constantRoutes,
+  routes: constantRoutes.concat(asyncRoutes),
 })
 //注释的地方是允许路由重复点击，如果你觉得框架路由跳转规范太过严格可选择放开
 const originalPush = VueRouter.prototype.push
