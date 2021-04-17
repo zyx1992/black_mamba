@@ -26,6 +26,7 @@ router.beforeResolve(async (to, from, next) => {
   if (!loginInterception) hasToken = true
   if (hasToken) {
     await store.dispatch('routes/setRoutes')
+    await store.dispatch('common/getUserInfo')
     next()
   } else {
     if (routesWhiteList.indexOf(to.path) !== -1) {

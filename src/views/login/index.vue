@@ -156,8 +156,11 @@
             singin(this.form)
               .then((res) => {
                 this.$baseNotify(`欢迎登录${title}`)
-                this.$store.commit('common/setAccessToken', res['access_token'])
-                this.$router.push(`/task`)
+                this.$store.dispatch(
+                  'common/getAccessToken',
+                  res['access_token']
+                )
+                this.$router.push(`/index`)
               })
               .finally(() => {
                 this.loading = false

@@ -13,5 +13,5 @@ export function singin(params) {
 }
 
 export function userInfo() {
-  return $http.post('/sender-handle/info')
+  return $http.get('/sender-handle/info')
 }

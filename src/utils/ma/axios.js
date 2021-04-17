@@ -7,9 +7,7 @@ import axios from 'axios'
 import { getAccessToken } from '@/utils/ma/accessToken'
 
 // 请求头参数设置
-const headers = {
-  Authorization: `Basic ${getAccessToken('access_token')}`,
-}
+const headers = {}
 const Axios = axios.create({
   timeout: 10000,
   baseURL: '/',

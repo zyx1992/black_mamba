@@ -73,8 +73,8 @@ export const asyncRoutes = [
         meta: {
           title: '任务发布',
           noKeepAlive: true,
+          hidden: true,
         },
-        children: null,
       },
       {
         path: 'list',
