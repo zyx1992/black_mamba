@@ -2,12 +2,16 @@
   <div class="ma-wallet-consume">
     <div class="ma-consume-table">
       <el-table v-loading="loading" :data="list" border>
-        <el-table-column prop="id" label="金额"></el-table-column>
-        <el-table-column prop="count" label="操作描述"></el-table-column>
+        <el-table-column prop="amount" label="金额"></el-table-column>
+        <el-table-column
+          prop="expendTypeDescribe"
+          label="操作描述"
+        ></el-table-column>
+        <el-table-column prop="createdAt" label="时间"></el-table-column>
       </el-table>
       <el-pagination
         :current-page.sync="query.page"
-        :page-size="query.pageSize"
+        :page-size="query.limit"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
         @size-change="handleSizeChange"
@@ -18,16 +22,18 @@
 </template>
 
 <script>
+  import { getExpendList } from '@/api/ma/wallet'
   export default {
     name: 'Consume',
     data() {
       return {
         list: [],
-        total: 10,
+        total: 0,
         query: {
           page: 1,
-          pageSize: 10,
+          limit: 10,
         },
+        loading: false,
       }
     },
     created() {
@@ -35,10 +41,19 @@
     },
     methods: {
       async handleGetList() {
-        this.list = await []
+        this.loading = true
+        getExpendList(this.query)
+          .then((res) => {
+            // TODO 替换res[0]
+            this.list = res && res[0] && res[0].data
+            this.total = res && res[0] && res[0].count
+          })
+          .finally((_) => {
+            this.loading = false
+          })
       },
       handleSizeChange(val) {
-        this.query.pageSize = val
+        this.query.limit = val
       },
       handleCurrentChange(val) {
         this.query.page = val

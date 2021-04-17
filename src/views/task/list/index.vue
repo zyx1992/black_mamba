@@ -81,7 +81,7 @@
       </el-table>
       <el-pagination
         :current-page.sync="query.page"
-        :page-size="query.pageSize"
+        :page-size="query.limit"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
         @size-change="handleSizeChange"
@@ -100,7 +100,7 @@
     data() {
       return {
         list: [],
-        total: 10,
+        total: 0,
         query: {
           beginTime: '',
           endTime: '',
@@ -111,7 +111,6 @@
           taskStatus: null,
           userType: '2',
           page: 1,
-          pageSize: 10,
           date: '',
         },
         typeList: {},
@@ -148,7 +147,7 @@
         this.btnLoading = false
       },
       handleSizeChange(val) {
-        this.query.pageSize = val
+        this.query.limit = val
       },
       handleCurrentChange(val) {
         this.query.page = val
