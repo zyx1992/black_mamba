@@ -20,5 +20,3 @@ export function getTaskCost(params) {
 export function createTask(params) {
   return $http.post('/sender-task/creator', params)
 }
-
-

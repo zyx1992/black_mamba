@@ -4,8 +4,8 @@
  * @date: 2019.11.27
  */
 import axios from 'axios'
-import { getAccessToken } from '@/utils/ma/accessToken'
-import router from '@/router'
+import { getAccessToken, removeAccessToken } from '@/utils/ma/accessToken'
+import VueRouter from 'vue-router'
 
 // 请求头参数设置
 const headers = {}
@@ -38,6 +38,10 @@ Axios.interceptors.response.use(
     }
   },
   (error) => {
+    if (error.response.status === 401) {
+      removeAccessToken()
+      VueRouter.push('/login')
+    }
     return Promise.reject(error)
   }
 )
