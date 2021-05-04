@@ -5,7 +5,7 @@
       返回任务列表
     </div>
     <div class="wrapper-container">
-      <el-form v-model="formData" label-width="100px" label-position="left">
+      <el-form ref="addForm" v-model="formData" :rules="rules" label-width="110px" label-position="left">
         <el-row :gutter="40">
           <el-col :span="12">
             <div class="form-label">任务控制</div>
@@ -35,12 +35,12 @@
               ></el-input>
             </el-form-item>
             <div class="form-label">商品信息</div>
-            <el-form-item label="商品链接">
+            <el-form-item label="商品链接" prop="xssTaskProductBO.productUrl">
               <el-input
                 v-model="formData.xssTaskProductBO.productUrl"
               ></el-input>
             </el-form-item>
-            <el-form-item label="敦煌网店铺ID">
+            <el-form-item label="敦煌网店铺ID" prop="xssTaskProductBO.storeName">
               <el-input
                 v-model="formData.xssTaskProductBO.storeName"
               ></el-input>
@@ -52,15 +52,17 @@
                 :min="1"
               ></el-input-number>
             </el-form-item>
-            <el-form-item label="订单成交价">
+            <el-form-item label="订单成交价" prop="xssTaskProductBO.transactionPrice">
               <el-input v-model="formData.xssTaskProductBO.transactionPrice">
                 <template slot="append">美元</template>
               </el-input>
             </el-form-item>
             <el-form-item label="商品规格">
-              <span>Color:</span>
+              <div>Color:</div>
+              <el-input v-model="formData.color"></el-input>
               <div class="color-list"></div>
-              <span>Options:</span>
+              <div>Options:</div>
+              <el-input v-model="formData.options"></el-input>
               <div class="options-list"></div>
             </el-form-item>
           </el-col>
@@ -102,7 +104,7 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="买手国家">
+            <el-form-item label="买手国家" prop="xssTaskDetailBO.buyerCountry">
               <el-select v-model="formData.xssTaskDetailBO.buyerCountry">
                 <el-option
                   v-for="item in Object.entries($options.countries)"
@@ -191,120 +193,183 @@
           </el-col>
         </el-row>
       </el-form>
-      <el-button @click="handleSubmit"></el-button>
+      <el-button @click="handleSubmit">提交</el-button>
     </div>
   </div>
 </template>
 
 <script>
-  import {
-    publishMode,
-    taskOrigins,
-    taskOriginRules,
-    countries,
-    changePrices,
-    collections,
-    express,
-    days,
-    commentRequire,
-    stars,
-  } from '../../const'
-  import { getTaskCost } from '@/api/ma/task'
-  export default {
-    name: 'Add',
-    publishMode,
-    taskOrigins,
-    taskOriginRules,
-    countries,
-    changePrices,
-    collections,
-    express,
-    days,
-    commentRequire,
-    stars,
-    data() {
-      return {
-        formData: {
-          xssTaskBO: {
-            releasePattern: 1,
-            remark: '',
-            taskCount: 1,
-          },
-          xssTaskCostBO: {
-            commission: 0,
-            exchangeRate: 0,
-            payPoundage: 0,
-            principal: 0,
-            reviewFee: 0,
-            totalAmount: 0,
-          },
-          xssTaskDetailBO: {
-            buyerCountry: 2,
-            collectionRequire: 0,
-            confirmDeliveredDays: 7,
-            customReview: '', // TODO 处理联动
-            isChangePrice: 0,
-            isNeedLogistic: 1,
-            orderMsgReq: '',
-            requirements: '', // TODO 处理联动
-            reviewStar: 5,
-            reviewType: 1,
-            routeReq: 1,
-            taskTerminal: 1,
-          },
-          xssTaskProductBO: {
-            itemcode: '',
-            productUrl: '',
-            storeName: '',
-            transactionPrice: '',
-            productCount: 1,
-            productVariant: '',
-          },
+import {
+  publishMode,
+  taskOrigins,
+  taskOriginRules,
+  countries,
+  changePrices,
+  collections,
+  express,
+  days,
+  commentRequire,
+  stars,
+} from '../../const'
+import { getTaskCost, createTask } from '@/api/ma/task'
+
+export default {
+  name: 'Add',
+  publishMode,
+  taskOrigins,
+  taskOriginRules,
+  countries,
+  changePrices,
+  collections,
+  express,
+  days,
+  commentRequire,
+  stars,
+  data() {
+    return {
+      formData: {
+        xssTaskBO: {
+          releasePattern: 1,
+          remark: '',
+          taskCount: 1,
         },
-        query: {
-          currency: 'USD',
-          productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
-          productPrice: this?.formData?.xssTaskProductBO?.transactionPrice || 1,
-          reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
+        xssTaskCostBO: {
+          commission: 0,
+          exchangeRate: 0,
+          payPoundage: 0,
+          principal: 0,
+          reviewFee: 0,
+          totalAmount: 0,
         },
-      }
-    },
-    mounted() {
+        xssTaskDetailBO: {
+          buyerCountry: 2,
+          collectionRequire: 0,
+          confirmDeliveredDays: 7,
+          customReview: '', // TODO 处理联动
+          isChangePrice: 0,
+          isNeedLogistic: 1,
+          orderMsgReq: '',
+          requirements: '', // TODO 处理联动
+          reviewStar: 5,
+          reviewType: 1,
+          routeReq: 1,
+          taskTerminal: 1,
+        },
+        xssTaskProductBO: {
+          itemcode: '',
+          productUrl: '',
+          storeName: '',
+          transactionPrice: null,
+          productCount: 1,
+          productVariant: ''
+        },
+        color: '',
+        options: ''
+      },
+      rules: {
+        'xssTaskDetailBO.buyerCountry': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请选择买手国家'
+          }
+        ],
+        'xssTaskProductBO.itemcode': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品编号'
+          }
+        ],
+        'xssTaskProductBO.productUrl': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品页最终页链接'
+          }
+        ],
+        'xssTaskProductBO.storeName': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品所属店铺名称'
+          }
+        ],
+        'xssTaskProductBO.transactionPrice': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品成交价'
+          }
+        ]
+      },
+      query: {}
+    }
+  },
+  mounted() {
+  },
+  watch: {
+    'formData.xssTaskProductBO.productCount': function () {
       this.handleGetCost()
     },
-    methods: {
-      handleSubmit() {},
-      handleGetCost() {
-        getTaskCost(this.query).then((res) => {
-          this.form.xssTaskCostBO = res
-        })
-      },
+    'formData.xssTaskProductBO.transactionPrice': function () {
+      this.handleGetCost()
     },
-  }
+    'formData.xssTaskDetailBO.reviewType': function () {
+      this.handleGetCost()
+    }
+  },
+  methods: {
+    handleSubmit() {
+      this.$refs.addForm.validate(async (valid) => {
+        console.log('formData', this.formData)
+        this.formData.xssTaskProductBO.productVariant = this.formData.color + '_' + this.formData.options
+        delete this.formData.color
+        delete this.formData.options
+        createTask(this.formData).then(res => {
+          console.log('===res', res)
+        })
+      })
+    },
+    handleGetCost() {
+      this.query = {
+        currency: 'USD',
+        productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
+        productPrice: Number(this?.formData?.xssTaskProductBO?.transactionPrice || 1),
+        reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
+      }
+      if(!this.query.productPrice) return
+      console.log('--query', this.query)
+      getTaskCost(this.query).then((res) => {
+        this.form.xssTaskCostBO = res
+      })
+    },
+  },
+}
 </script>
 
 <style scoped lang="scss">
-  .task-list-add {
-    .wrapper-header {
-      margin-bottom: 20px;
+.task-list-add {
+  .wrapper-header {
+    margin-bottom: 20px;
+  }
+  .wrapper-container {
+    margin-top: 10px;
+    .el-form-item {
+      .el-input,
+      .el-select,
+      .el-textarea,
+      .el-input-number {
+        width: 90%;
+      }
     }
-    .wrapper-container {
-      margin-top: 10px;
-      .el-form-item {
-        .el-input,
-        .el-select,
-        .el-textarea,
-        .el-input-number {
-          width: 90%;
-        }
-      }
-      .form-label {
-        font-size: 16px;
-        color: #1890ff;
-        padding-bottom: 2px;
-        border-bottom: 1px dotted;
-        margin-bottom: 10px;
-      }
+    .form-label {
+      font-size: 16px;
+      color: #1890ff;
+      padding-bottom: 2px;
+      border-bottom: 1px dotted;
+      margin-bottom: 10px;
     }
   }
+}
 </style>

@@ -16,3 +16,9 @@ export function deleteTask(id) {
 export function getTaskCost(params) {
   return $http.post('/sender-task/cost', params)
 }
+
+export function createTask(params) {
+  return $http.post('/sender-task/creator', params)
+}
+
+
