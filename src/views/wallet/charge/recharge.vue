@@ -65,7 +65,6 @@
             ></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button size="medium">取消</el-button>
             <el-button
               size="medium"
               type="primary"

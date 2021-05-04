@@ -45,8 +45,8 @@
         getExpendList(this.query)
           .then((res) => {
             // TODO 替换res[0]
-            this.list = res && res[0] && res[0].data
-            this.total = res && res[0] && res[0].count
+            this.list = res.data || []
+            this.total = res.count || 0
           })
           .finally((_) => {
             this.loading = false
