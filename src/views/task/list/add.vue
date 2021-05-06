@@ -7,7 +7,7 @@
     <div class="wrapper-container">
       <el-form
         ref="addForm"
-        v-model="formData"
+        :model="formData"
         :rules="rules"
         label-width="110px"
         label-position="left"
@@ -91,7 +91,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="来路要求">
-              <el-select v-model="formData.xssTaskDetailBO.reviewType">
+              <el-select v-model="formData.xssTaskDetailBO.routeReq">
                 <el-option
                   v-for="item in Object.entries($options.taskOriginRules)"
                   :key="item[0]"
@@ -100,8 +100,7 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="来路详情">
-              <!--TODO 不是1的时候要求必填-->
+            <el-form-item label="来路详情" prop="xssTaskDetailBO.requirements">
               <el-input
                 v-model="formData.xssTaskDetailBO.requirements"
               ></el-input>
@@ -162,7 +161,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="评论方式">
-              <el-select v-model="formData.xssTaskDetailBO.routeReq">
+              <el-select v-model="formData.xssTaskDetailBO.reviewType">
                 <el-option
                   v-for="item in Object.entries($options.commentRequire)"
                   :key="item[0]"
@@ -170,6 +169,9 @@
                   :value="item[1]"
                 ></el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item label="自定义订单评语" prop="xssTaskDetailBO.customReview">
+              <el-input type="textarea" v-model="formData.xssTaskDetailBO.customReview"></el-input>
             </el-form-item>
             <el-form-item label="评论星级">
               <el-select v-model="formData.xssTaskDetailBO.reviewStar">
@@ -211,179 +213,215 @@
 </template>
 
 <script>
-  import {
-    publishMode,
-    taskOrigins,
-    taskOriginRules,
-    countries,
-    changePrices,
-    collections,
-    express,
-    days,
-    commentRequire,
-    stars,
-  } from '../../const'
-  import { getTaskCost, createTask } from '@/api/ma/task'
+import {
+  publishMode,
+  taskOrigins,
+  taskOriginRules,
+  countries,
+  changePrices,
+  collections,
+  express,
+  days,
+  commentRequire,
+  stars,
+} from '../../const'
+import { getTaskCost, createTask } from '@/api/ma/task'
 
-  export default {
-    name: 'Add',
-    publishMode,
-    taskOrigins,
-    taskOriginRules,
-    countries,
-    changePrices,
-    collections,
-    express,
-    days,
-    commentRequire,
-    stars,
-    data() {
-      return {
-        formData: {
-          xssTaskBO: {
-            releasePattern: 1,
-            remark: '',
-            taskCount: 1,
-          },
-          xssTaskCostBO: {
-            commission: 0,
-            exchangeRate: 0,
-            payPoundage: 0,
-            principal: 0,
-            reviewFee: 0,
-            totalAmount: 0,
-          },
-          xssTaskDetailBO: {
-            buyerCountry: 2,
-            collectionRequire: 0,
-            confirmDeliveredDays: 7,
-            customReview: '', // TODO 处理联动
-            isChangePrice: 0,
-            isNeedLogistic: 1,
-            orderMsgReq: '',
-            requirements: '', // TODO 处理联动
-            reviewStar: 5,
-            reviewType: 1,
-            routeReq: 1,
-            taskTerminal: 1,
-          },
-          xssTaskProductBO: {
-            itemcode: '',
-            productUrl: '',
-            storeName: '',
-            transactionPrice: null,
-            productCount: 1,
-            productVariant: '',
-          },
-          color: '',
-          options: '',
-        },
-        rules: {
-          'xssTaskDetailBO.buyerCountry': [
-            {
-              required: true,
-              trigger: 'blur',
-              message: '请选择买手国家',
-            },
-          ],
-          'xssTaskProductBO.itemcode': [
-            {
-              required: true,
-              trigger: 'blur',
-              message: '请填写产品编号',
-            },
-          ],
-          'xssTaskProductBO.productUrl': [
-            {
-              required: true,
-              trigger: 'blur',
-              message: '请填写产品页最终页链接',
-            },
-          ],
-          'xssTaskProductBO.storeName': [
-            {
-              required: true,
-              trigger: 'blur',
-              message: '请填写产品所属店铺名称',
-            },
-          ],
-          'xssTaskProductBO.transactionPrice': [
-            {
-              required: true,
-              trigger: 'blur',
-              message: '请填写产品成交价',
-            },
-          ],
-        },
-        query: {},
+export default {
+  name: 'Add',
+  publishMode,
+  taskOrigins,
+  taskOriginRules,
+  countries,
+  changePrices,
+  collections,
+  express,
+  days,
+  commentRequire,
+  stars,
+  data() {
+    // 来路详情为2，3，4类型时必填
+    const requirementsValidator = (rule, value, callback) => {
+      let type = this.formData.xssTaskDetailBO.routeReq || null
+      let list = [2, 3, 4]
+      if (list.includes(type) && !value) {
+        callback(new Error('请填写来路详情'))
       }
+      else {
+        callback()
+      }
+    }
+    // 评论方式为3时必填
+    const customReviewValidator = (rule, value, callback) => {
+      let type = this.formData.xssTaskDetailBO.reviewType || null
+      let list = [3]
+      if (list.includes(type) && !value) {
+        callback(new Error('请填写自定义订单评语'))
+      }
+      else {
+        callback()
+      }
+    }
+    return {
+      formData: {
+        xssTaskBO: {
+          // 本期默为'1'
+          releasePattern: 1,
+          remark: '',
+          taskCount: 1,
+        },
+        xssTaskCostBO: {
+          commission: 0,
+          exchangeRate: 0,
+          payPoundage: 0,
+          principal: 0,
+          reviewFee: 0,
+          totalAmount: 0,
+        },
+        xssTaskDetailBO: {
+          buyerCountry: 2,
+          collectionRequire: 0,
+          confirmDeliveredDays: 7,
+          customReview: '',
+          isChangePrice: 0,
+          isNeedLogistic: 1,
+          orderMsgReq: '',
+          requirements: '',
+          reviewStar: 5,
+          reviewType: 1,
+          routeReq: 1,
+          taskTerminal: 1,
+        },
+        xssTaskProductBO: {
+          itemcode: '', // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
+          productUrl: '',
+          storeName: '',
+          transactionPrice: 0,
+          productCount: 1,
+          productVariant: '',
+        },
+        color: '',
+        options: '',
+      },
+      rules: {
+        'xssTaskDetailBO.buyerCountry': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请选择买手国家',
+          },
+        ],
+        'xssTaskProductBO.itemcode': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品编号',
+          },
+        ],
+        'xssTaskProductBO.productUrl': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品页最终页链接',
+          },
+        ],
+        'xssTaskProductBO.storeName': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品所属店铺名称',
+          },
+        ],
+        'xssTaskProductBO.transactionPrice': [
+          {
+            required: true,
+            trigger: 'blur',
+            message: '请填写产品成交价',
+          },
+        ],
+        'xssTaskDetailBO.requirements': [
+          {
+            trigger: 'blur',
+            validator: requirementsValidator,
+          },
+        ],
+        'xssTaskDetailBO.customReview': [
+          {
+            trigger: 'blur',
+            validator: customReviewValidator,
+          },
+        ]
+      },
+      query: {},
+    }
+  },
+  watch: {
+    'formData.xssTaskProductBO.productCount': function () {
+      this.handleGetCost()
     },
-    watch: {
-      'formData.xssTaskProductBO.productCount': function () {
-        this.handleGetCost()
-      },
-      'formData.xssTaskProductBO.transactionPrice': function () {
-        this.handleGetCost()
-      },
-      'formData.xssTaskDetailBO.reviewType': function () {
-        this.handleGetCost()
-      },
+    'formData.xssTaskProductBO.transactionPrice': function () {
+      this.handleGetCost()
     },
-    mounted() {},
-    methods: {
-      handleSubmit() {
-        this.$refs.addForm.validate(async (valid) => {
-          console.log('formData', this.formData)
-          this.formData.xssTaskProductBO.productVariant =
-            this.formData.color + '_' + this.formData.options
-          delete this.formData.color
-          delete this.formData.options
-          createTask(this.formData).then((res) => {
-            console.log('===res', res)
-          })
-        })
-      },
-      handleGetCost() {
-        this.query = {
-          currency: 'USD',
-          productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
-          productPrice: Number(
-            this?.formData?.xssTaskProductBO?.transactionPrice || 1
-          ),
-          reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
-        }
-        if (!this.query.productPrice) return
-        console.log('--query', this.query)
-        getTaskCost(this.query).then((res) => {
-          this.form.xssTaskCostBO = res
-        })
-      },
+    'formData.xssTaskDetailBO.reviewType': function () {
+      this.handleGetCost()
     },
-  }
+  },
+  mounted() {
+  },
+  methods: {
+    handleSubmit() {
+      this.$refs.addForm.validate(async (valid) => {
+        console.log('formData', this.formData)
+        this.formData.xssTaskProductBO.productVariant =
+          this.formData.color + '_' + this.formData.options
+        delete this.formData.color
+        delete this.formData.options
+//          createTask(this.formData).then((res) => {
+//            console.log('===res', res)
+//          })
+      })
+    },
+    handleGetCost() {
+      this.query = {
+        currency: 'USD',
+        productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
+        productPrice: Number(
+          this?.formData?.xssTaskProductBO?.transactionPrice || 1
+        ),
+        reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
+      }
+      if (!this.query.productPrice) return
+      console.log('--query', this.query)
+//      getTaskCost(this.query).then((res) => {
+//        this.form.xssTaskCostBO = res
+//      })
+    },
+  },
+}
 </script>
 
 <style scoped lang="scss">
-  .task-list-add {
-    .wrapper-header {
-      margin-bottom: 20px;
+.task-list-add {
+  .wrapper-header {
+    margin-bottom: 20px;
+  }
+  .wrapper-container {
+    margin-top: 10px;
+    .el-form-item {
+      .el-input,
+      .el-select,
+      .el-textarea,
+      .el-input-number {
+        width: 90%;
+      }
     }
-    .wrapper-container {
-      margin-top: 10px;
-      .el-form-item {
-        .el-input,
-        .el-select,
-        .el-textarea,
-        .el-input-number {
-          width: 90%;
-        }
-      }
-      .form-label {
-        font-size: 16px;
-        color: #1890ff;
-        padding-bottom: 2px;
-        border-bottom: 1px dotted;
-        margin-bottom: 10px;
-      }
+    .form-label {
+      font-size: 16px;
+      color: #1890ff;
+      padding-bottom: 2px;
+      border-bottom: 1px dotted;
+      margin-bottom: 10px;
     }
   }
+}
 </style>
