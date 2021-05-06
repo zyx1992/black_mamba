@@ -5,6 +5,11 @@ export function getTaskList(params) {
   return $http.post('/task/list', params)
 }
 
+export function getTaskDetail(id) {
+  return $http.get(' /task/detail', {id})
+}
+
+
 export function getTaskType() {
   return taskStatus
 }

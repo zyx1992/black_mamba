@@ -1,8 +1,10 @@
 <template>
   <div class="task-list-add">
     <div class="wrapper-header">
-      <el-icon class="el-icon-arrow-left"></el-icon>
-      返回任务列表
+      <router-link to="/task/list" style="color: #2c3e50">
+        <el-icon class="el-icon-arrow-left"></el-icon>
+        返回任务列表
+      </router-link>
     </div>
     <div class="wrapper-container">
       <el-form
@@ -183,32 +185,46 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <div class="form-label">费用清单</div>
-            <div class="cost-list">
-              <div class="cost-item">
-                今日汇率：{{ formData.xssTaskCostBO.exchangeRate }}
-              </div>
-              <div class="cost-item">
-                收取本金：{{ formData.xssTaskCostBO.principal }}
-              </div>
-              <div class="cost-item">
-                支付手续费：{{ formData.xssTaskCostBO.payPoundage }}
-              </div>
-              <div class="cost-item">
-                基本佣金：{{ formData.xssTaskCostBO.commission }}
-              </div>
-              <div class="cost-item">
-                评论费用：{{ formData.xssTaskCostBO.reviewFee }}
-              </div>
-              <div class="cost-item">
-                本单共计金额：{{ formData.xssTaskCostBO.totalAmount }}
-              </div>
-            </div>
           </el-col>
         </el-row>
       </el-form>
-      <el-button @click="handleSubmit">提交</el-button>
+      <div class="form-label"></div>
+      <el-button @click="handleSubmit" :loading="loading.submit" :disabled="loading.submit" type="primary">发布任务
+      </el-button>
     </div>
+    <el-dialog
+      width="500px"
+      class="cost-dialog"
+      title="温馨提示"
+      :modal-append-to-body="false"
+      :visible.sync="costDialog">
+      <div class="prompt">请确认本次发单的费用信息，确认无误点击"立即创建"即可发布您的任务</div>
+      <div class="cost-list">
+        <div class="cost-item">
+          今日汇率：{{ formData.xssTaskCostBO.exchangeRate }}
+        </div>
+        <div class="cost-item">
+          收取本金：{{ formData.xssTaskCostBO.principal }}
+        </div>
+        <div class="cost-item">
+          支付手续费：{{ formData.xssTaskCostBO.payPoundage }}
+        </div>
+        <div class="cost-item">
+          基本佣金：{{ formData.xssTaskCostBO.commission }}
+        </div>
+        <div class="cost-item">
+          评论费用：{{ formData.xssTaskCostBO.reviewFee }}
+        </div>
+        <div class="cost-item">
+          本单共计金额：{{ formData.xssTaskCostBO.totalAmount }}
+        </div>
+      </div>
+      <div class="operations">
+        <el-button type="primary" @click="handleCreate" :loading="loading.create" :disabled="loading.create">立即发布
+        </el-button>
+        <el-button @click="costDialog = false">我再想想</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -225,7 +241,7 @@ import {
   commentRequire,
   stars,
 } from '../../const'
-import { getTaskCost, createTask } from '@/api/ma/task'
+import { getTaskCost, createTask, getTaskDetail } from '@/api/ma/task'
 
 export default {
   name: 'Add',
@@ -296,7 +312,7 @@ export default {
           itemcode: '', // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
           productUrl: '',
           storeName: '',
-          transactionPrice: 0,
+          transactionPrice: null,
           productCount: 1,
           productVariant: '',
         },
@@ -353,32 +369,33 @@ export default {
         ]
       },
       query: {},
+      costDialog: false,
+      loading: {
+        submit: false,
+        create: false,
+        wrapper: false
+      }
     }
-  },
-  watch: {
-    'formData.xssTaskProductBO.productCount': function () {
-      this.handleGetCost()
-    },
-    'formData.xssTaskProductBO.transactionPrice': function () {
-      this.handleGetCost()
-    },
-    'formData.xssTaskDetailBO.reviewType': function () {
-      this.handleGetCost()
-    },
-  },
-  mounted() {
   },
   methods: {
     handleSubmit() {
       this.$refs.addForm.validate(async (valid) => {
+        this.loading.submit = true
+
         console.log('formData', this.formData)
-        this.formData.xssTaskProductBO.productVariant =
-          this.formData.color + '_' + this.formData.options
+        // 处理参数
+        this.formData.xssTaskProductBO.productVariant = this.formData.color + '_' + this.formData.options
         delete this.formData.color
         delete this.formData.options
-//          createTask(this.formData).then((res) => {
-//            console.log('===res', res)
-//          })
+        // 查询费用
+        this.handleGetCost()
+      })
+    },
+    handleCreate() {
+      createTask(this.formData).then((res) => {
+        this.$message('任务发布成功')
+        this.costDialog = false
+        this.$route.push('/task/list')
       })
     },
     handleGetCost() {
@@ -386,16 +403,23 @@ export default {
         currency: 'USD',
         productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
         productPrice: Number(
-          this?.formData?.xssTaskProductBO?.transactionPrice || 1
+          this?.formData?.xssTaskProductBO?.transactionPrice || 0
         ),
         reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
       }
+
       if (!this.query.productPrice) return
-      console.log('--query', this.query)
-//      getTaskCost(this.query).then((res) => {
-//        this.form.xssTaskCostBO = res
-//      })
-    },
+
+      getTaskCost(this.query).then((res) => {
+        this.form.xssTaskCostBO = res
+        this.costDialog = true
+      }).catch(err => {
+        console.log('==err', err)
+      }).finally(_ => {
+        // 提交按钮loading
+        this.loading.submit = false
+      })
+    }
   },
 }
 </script>
@@ -421,6 +445,22 @@ export default {
       padding-bottom: 2px;
       border-bottom: 1px dotted;
       margin-bottom: 10px;
+    }
+  }
+}
+
+.el-dialog {
+  .prompt {
+    font-size: 12px;
+    color: #999;
+    background: rgba(31, 50, 82, 0.04);
+    padding: 10px;
+  }
+  .cost-list {
+    margin: 20px 0;
+    .cost-item {
+      font-size: 14px;
+      margin-bottom: 5px;
     }
   }
 }
