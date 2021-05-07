@@ -101,22 +101,22 @@
         rules: {
           topUpAmount: [
             {
-              required: true,
+              required: false,
               trigger: 'blur',
-              min: 20,
+//              min: 20,
               message: '充值金额不能小于20元',
             },
           ],
           paymentAccount: [
             {
-              required: true,
+              required: false,
               trigger: 'blur',
               message: '请输入付款账号',
             },
           ],
           paymentOrderNo: [
             {
-              required: true,
+              required: false,
               trigger: 'blur',
               message: '请输入支付宝订单号',
             },

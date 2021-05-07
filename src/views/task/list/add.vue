@@ -411,7 +411,7 @@ export default {
       if (!this.query.productPrice) return
 
       getTaskCost(this.query).then((res) => {
-        this.form.xssTaskCostBO = res
+        this.formData.xssTaskCostBO = res
         this.costDialog = true
       }).catch(err => {
         console.log('==err', err)

@@ -38,15 +38,13 @@ const actions = {
   },
   async getUserInfo({ commit }) {
     const data = await userInfo()
-    console.log('===data', data)
+    console.log('==data', data)
+    commit('setUsername', data.username)
   },
   async logout({ dispatch }) {
-    await logout(state.accessToken)
     await dispatch('resetAccessToken')
-    await resetRouter()
   },
   resetAccessToken({ commit }) {
-    commit('setPermissions', [])
     commit('setAccessToken', '')
     removeAccessToken()
   },

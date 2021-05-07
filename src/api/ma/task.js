@@ -6,7 +6,7 @@ export function getTaskList(params) {
 }
 
 export function getTaskDetail(id) {
-  return $http.get(' /task/detail', {id})
+  return $http.get('/task/detail', {id})
 }
 
 

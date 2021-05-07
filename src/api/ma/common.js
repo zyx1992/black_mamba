@@ -15,3 +15,7 @@ export function singin(params) {
 export function userInfo() {
   return $http.get('/sender-handle/info')
 }
+
+export function changePassword(params) {
+  return $http.put('/sender-handle/password/setter', params)
+}

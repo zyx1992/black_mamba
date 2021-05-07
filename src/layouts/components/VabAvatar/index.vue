@@ -1,8 +1,6 @@
 <template>
   <el-dropdown @command="handleCommand">
     <span class="avatar-dropdown">
-      <!--<el-avatar class="user-avatar" :src="avatar"></el-avatar>-->
-      <img class="user-avatar" :src="avatar" alt="" />
       <div class="user-name">
         {{ username }}
         <i class="el-icon-arrow-down el-icon--right"></i>
@@ -10,9 +8,7 @@
     </span>
 
     <el-dropdown-menu slot="dropdown">
-      <el-dropdown-item command="home" divided>首页</el-dropdown-item>
       <el-dropdown-item command="password" divided>修改密码</el-dropdown-item>
-      <el-dropdown-item command="wallet" divided>资金账户</el-dropdown-item>
       <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
@@ -26,8 +22,7 @@
     name: 'VabAvatar',
     computed: {
       ...mapGetters({
-        avatar: 'user/avatar',
-        username: 'user/username',
+        username: 'common/username',
       }),
     },
     methods: {
@@ -36,6 +31,9 @@
           case 'logout':
             this.logout()
             break
+          case 'password':
+            console.log('==更改密码')
+            break
         }
       },
       logout() {
@@ -43,7 +41,7 @@
           '您确定要退出' + this.$baseTitle + '吗?',
           null,
           async () => {
-            await this.$store.dispatch('user/logout')
+            await this.$store.dispatch('common/logout')
             if (recordRoute) {
               const fullPath = this.$route.fullPath
               this.$router.push(`/login?redirect=${fullPath}`)
