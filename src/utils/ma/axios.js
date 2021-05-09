@@ -40,7 +40,6 @@ Axios.interceptors.response.use(
   (error) => {
     if (error.response.status === 401) {
       removeAccessToken()
-      VueRouter && VueRouter.push('/login')
     }
     return Promise.reject(error)
   }

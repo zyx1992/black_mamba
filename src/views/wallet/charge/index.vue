@@ -101,6 +101,7 @@
         this.loading = true
         getRechargeList(this.query)
           .then((res) => {
+            console.log('==res', res)
             this.list = res.data || []
             this.total = res.count || 0
           })
