@@ -9,7 +9,7 @@
       <div class="card-item">
         冻结本金：{{ frezze }}元（查看详细说明）
         <span>
-          <el-button>提现</el-button>
+          <!--<el-button>提现</el-button>-->
           <el-button @click="$router.push('/wallet/rechargeList')">
             充值明细
           </el-button>
@@ -43,12 +43,12 @@
             ></el-input>
             <div>最少充值金额20元</div>
           </el-form-item>
-          <el-form-item label="今日汇率">
-            <span>{{ rate }}元</span>
-          </el-form-item>
-          <el-form-item label="所需人民币">
-            <span class="point">100元</span>
-          </el-form-item>
+          <!--<el-form-item label="今日汇率">-->
+            <!--<span>{{ rate }}元</span>-->
+          <!--</el-form-item>-->
+          <!--<el-form-item label="所需人民币">-->
+            <!--<span class="point">100元</span>-->
+          <!--</el-form-item>-->
           <el-form-item label="充值方式">
             <div>图</div>
           </el-form-item>
@@ -103,7 +103,7 @@
             {
               required: false,
               trigger: 'blur',
-//              min: 20,
+              //              min: 20,
               message: '充值金额不能小于20元',
             },
           ],
@@ -145,7 +145,9 @@
             this.btnLoading = true
             setPayment(this.query)
               .then((res) => {
+                this.$message.success('提交成功，请等待充值审核')
                 this.getUserInfo()
+                this.handleReset()
               })
               .finally((_) => {
                 this.btnLoading = false
@@ -153,6 +155,13 @@
           }
         })
       },
+      handleReset() {
+        this.query = {
+          topUpAmount: null,
+          paymentAccount: '',
+          paymentOrderNo: ''
+        }
+      }
     },
   }
 </script>

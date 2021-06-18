@@ -70,10 +70,10 @@ export const asyncRoutes = [
         path: 'add',
         name: 'add',
         component: () => import('@/views/task/list/add'),
+        hidden: true,
         meta: {
           title: '任务发布',
           noKeepAlive: true,
-          hidden: true,
         },
       },
       {
@@ -81,6 +81,7 @@ export const asyncRoutes = [
         name: 'list',
         component: () => import('@/views/task/list/index'),
         meta: {
+          icon: 'shopping-cart',
           title: '任务列表',
         },
       },

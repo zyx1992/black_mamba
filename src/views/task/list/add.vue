@@ -172,8 +172,14 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="自定义订单评语" prop="xssTaskDetailBO.customReview">
-              <el-input type="textarea" v-model="formData.xssTaskDetailBO.customReview"></el-input>
+            <el-form-item
+              label="自定义订单评语"
+              prop="xssTaskDetailBO.customReview"
+            >
+              <el-input
+                v-model="formData.xssTaskDetailBO.customReview"
+                type="textarea"
+              ></el-input>
             </el-form-item>
             <el-form-item label="评论星级">
               <el-select v-model="formData.xssTaskDetailBO.reviewStar">
@@ -189,7 +195,13 @@
         </el-row>
       </el-form>
       <div class="form-label"></div>
-      <el-button @click="handleSubmit" :loading="loading.submit" :disabled="loading.submit" type="primary">发布任务
+      <el-button
+        :loading="loading.submit"
+        :disabled="loading.submit"
+        type="primary"
+        @click="handleSubmit"
+      >
+        发布任务
       </el-button>
     </div>
     <el-dialog
@@ -197,30 +209,39 @@
       class="cost-dialog"
       title="温馨提示"
       :modal-append-to-body="false"
-      :visible.sync="costDialog">
-      <div class="prompt">请确认本次发单的费用信息，确认无误点击"立即创建"即可发布您的任务</div>
+      :visible.sync="costDialog"
+    >
+      <div class="prompt">
+        请确认本次发单的费用信息，确认无误点击"立即创建"即可发布您的任务
+      </div>
       <div class="cost-list">
         <div class="cost-item">
-          今日汇率：{{ formData.xssTaskCostBO.exchangeRate }}
+          今日汇率：{{ formData.xssTaskCostBO.exchangeRate && formData.xssTaskCostBO.exchangeRate.toFixed(2) }}
         </div>
         <div class="cost-item">
-          收取本金：{{ formData.xssTaskCostBO.principal }}
+          收取本金：{{ formData.xssTaskCostBO.principal && formData.xssTaskCostBO.principal.toFixed(2) }}
         </div>
         <div class="cost-item">
-          支付手续费：{{ formData.xssTaskCostBO.payPoundage }}
+          支付手续费：{{ formData.xssTaskCostBO.payPoundage && formData.xssTaskCostBO.payPoundage.toFixed(2) }}
         </div>
         <div class="cost-item">
-          基本佣金：{{ formData.xssTaskCostBO.commission }}
+          基本佣金：{{ formData.xssTaskCostBO.commission && formData.xssTaskCostBO.commission.toFixed(2)}}
         </div>
         <div class="cost-item">
-          评论费用：{{ formData.xssTaskCostBO.reviewFee }}
+          评论费用：{{ formData.xssTaskCostBO.reviewFee && formData.xssTaskCostBO.reviewFee.toFixed(2)}}
         </div>
         <div class="cost-item">
-          本单共计金额：{{ formData.xssTaskCostBO.totalAmount }}
+          本单共计金额：{{ formData.xssTaskCostBO.totalAmount && formData.xssTaskCostBO.totalAmount.toFixed(2) }}
         </div>
       </div>
       <div class="operations">
-        <el-button type="primary" @click="handleCreate" :loading="loading.create" :disabled="loading.create">立即发布
+        <el-button
+          type="primary"
+          :loading="loading.create"
+          :disabled="loading.create"
+          @click="handleCreate"
+        >
+          立即发布
         </el-button>
         <el-button @click="costDialog = false">我再想想</el-button>
       </div>
@@ -229,239 +250,244 @@
 </template>
 
 <script>
-import {
-  publishMode,
-  taskOrigins,
-  taskOriginRules,
-  countries,
-  changePrices,
-  collections,
-  express,
-  days,
-  commentRequire,
-  stars,
-} from '../../const'
-import { getTaskCost, createTask, getTaskDetail } from '@/api/ma/task'
+  import {
+    publishMode,
+    taskOrigins,
+    taskOriginRules,
+    countries,
+    changePrices,
+    collections,
+    express,
+    days,
+    commentRequire,
+    stars,
+  } from '../../const'
+  import { getTaskCost, createTask, getTaskDetail } from '@/api/ma/task'
 
-export default {
-  name: 'Add',
-  publishMode,
-  taskOrigins,
-  taskOriginRules,
-  countries,
-  changePrices,
-  collections,
-  express,
-  days,
-  commentRequire,
-  stars,
-  data() {
-    // 来路详情为2，3，4类型时必填
-    const requirementsValidator = (rule, value, callback) => {
-      let type = this.formData.xssTaskDetailBO.routeReq || null
-      let list = [2, 3, 4]
-      if (list.includes(type) && !value) {
-        callback(new Error('请填写来路详情'))
+  export default {
+    name: 'Add',
+    publishMode,
+    taskOrigins,
+    taskOriginRules,
+    countries,
+    changePrices,
+    collections,
+    express,
+    days,
+    commentRequire,
+    stars,
+    data() {
+      // 来路详情为2，3，4类型时必填
+      const requirementsValidator = (rule, value, callback) => {
+        let type = this.formData.xssTaskDetailBO.routeReq || null
+        let list = [2, 3, 4]
+        if (list.includes(type) && !value) {
+          callback(new Error('请填写来路详情'))
+        } else {
+          callback()
+        }
       }
-      else {
-        callback()
+      // 评论方式为3时必填
+      const customReviewValidator = (rule, value, callback) => {
+        let type = this.formData.xssTaskDetailBO.reviewType || null
+        let list = [3]
+        if (list.includes(type) && !value) {
+          callback(new Error('请填写自定义订单评语'))
+        } else {
+          callback()
+        }
       }
-    }
-    // 评论方式为3时必填
-    const customReviewValidator = (rule, value, callback) => {
-      let type = this.formData.xssTaskDetailBO.reviewType || null
-      let list = [3]
-      if (list.includes(type) && !value) {
-        callback(new Error('请填写自定义订单评语'))
-      }
-      else {
-        callback()
-      }
-    }
-    return {
-      formData: {
-        xssTaskBO: {
-          // 本期默为'1'
-          releasePattern: 1,
-          remark: '',
-          taskCount: 1,
+      return {
+        formData: {
+          xssTaskBO: {
+            // 本期默为'1'
+            releasePattern: 1,
+            remark: '',
+            taskCount: 1,
+          },
+          xssTaskCostBO: {
+            commission: 0,
+            exchangeRate: 0,
+            payPoundage: 0,
+            principal: 0,
+            reviewFee: 0,
+            totalAmount: 0,
+          },
+          xssTaskDetailBO: {
+            buyerCountry: 2,
+            collectionRequire: 0,
+            confirmDeliveredDays: 7,
+            customReview: '',
+            isChangePrice: 0,
+            isNeedLogistic: 1,
+            orderMsgReq: '',
+            requirements: '',
+            reviewStar: 5,
+            reviewType: 1,
+            routeReq: 1,
+            taskTerminal: 1,
+          },
+          xssTaskProductBO: {
+            itemcode: 123123, // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
+            productUrl: '',
+            storeName: '',
+            transactionPrice: null,
+            productCount: 1,
+            productVariant: '',
+          },
+          color: '',
+          options: '',
         },
-        xssTaskCostBO: {
-          commission: 0,
-          exchangeRate: 0,
-          payPoundage: 0,
-          principal: 0,
-          reviewFee: 0,
-          totalAmount: 0,
+        rules: {
+          'xssTaskDetailBO.buyerCountry': [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请选择买手国家',
+            },
+          ],
+          'xssTaskProductBO.itemcode': [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请填写产品编号',
+            },
+          ],
+          'xssTaskProductBO.productUrl': [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请填写产品页最终页链接',
+            },
+          ],
+          'xssTaskProductBO.storeName': [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请填写产品所属店铺名称',
+            },
+          ],
+          'xssTaskProductBO.transactionPrice': [
+            {
+              required: true,
+              trigger: 'blur',
+              message: '请填写产品成交价',
+            },
+          ],
+          'xssTaskDetailBO.requirements': [
+            {
+              trigger: 'blur',
+              validator: requirementsValidator,
+            },
+          ],
+          'xssTaskDetailBO.customReview': [
+            {
+              trigger: 'blur',
+              validator: customReviewValidator,
+            },
+          ],
         },
-        xssTaskDetailBO: {
-          buyerCountry: 2,
-          collectionRequire: 0,
-          confirmDeliveredDays: 7,
-          customReview: '',
-          isChangePrice: 0,
-          isNeedLogistic: 1,
-          orderMsgReq: '',
-          requirements: '',
-          reviewStar: 5,
-          reviewType: 1,
-          routeReq: 1,
-          taskTerminal: 1,
+        query: {},
+        costDialog: false,
+        loading: {
+          submit: false,
+          create: false,
+          wrapper: false,
         },
-        xssTaskProductBO: {
-          itemcode: '', // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
-          productUrl: '',
-          storeName: '',
-          transactionPrice: null,
-          productCount: 1,
-          productVariant: '',
-        },
-        color: '',
-        options: '',
-      },
-      rules: {
-        'xssTaskDetailBO.buyerCountry': [
-          {
-            required: true,
-            trigger: 'blur',
-            message: '请选择买手国家',
-          },
-        ],
-        'xssTaskProductBO.itemcode': [
-          {
-            required: true,
-            trigger: 'blur',
-            message: '请填写产品编号',
-          },
-        ],
-        'xssTaskProductBO.productUrl': [
-          {
-            required: true,
-            trigger: 'blur',
-            message: '请填写产品页最终页链接',
-          },
-        ],
-        'xssTaskProductBO.storeName': [
-          {
-            required: true,
-            trigger: 'blur',
-            message: '请填写产品所属店铺名称',
-          },
-        ],
-        'xssTaskProductBO.transactionPrice': [
-          {
-            required: true,
-            trigger: 'blur',
-            message: '请填写产品成交价',
-          },
-        ],
-        'xssTaskDetailBO.requirements': [
-          {
-            trigger: 'blur',
-            validator: requirementsValidator,
-          },
-        ],
-        'xssTaskDetailBO.customReview': [
-          {
-            trigger: 'blur',
-            validator: customReviewValidator,
-          },
-        ]
-      },
-      query: {},
-      costDialog: false,
-      loading: {
-        submit: false,
-        create: false,
-        wrapper: false
       }
-    }
-  },
-  methods: {
-    handleSubmit() {
-      this.$refs.addForm.validate(async (valid) => {
-        this.loading.submit = true
-
-        console.log('formData', this.formData)
-        // 处理参数
-        this.formData.xssTaskProductBO.productVariant = this.formData.color + '_' + this.formData.options
-        delete this.formData.color
-        delete this.formData.options
-        // 查询费用
-        this.handleGetCost()
-      })
     },
-    handleCreate() {
-      createTask(this.formData).then((res) => {
-        this.$message('任务发布成功')
-        this.costDialog = false
-        this.$route.push('/task/list')
-      })
+    methods: {
+      handleSubmit() {
+        this.$refs.addForm.validate(async (valid) => {
+          this.loading.submit = true
+
+          console.log('formData', this.formData)
+          // 处理参数
+          this.formData.xssTaskProductBO.productVariant =
+            this.formData.color + '_' + this.formData.options
+          delete this.formData.color
+          delete this.formData.options
+          // 查询费用
+          this.handleGetCost()
+        })
+      },
+      handleCreate() {
+        this.loading.create = true
+        createTask(this.formData).then((res) => {
+          this.$message('任务发布成功')
+          this.costDialog = false
+          this.$route.push('/task/list')
+        }).finally(_ => {
+          this.loading.create = false
+        })
+      },
+      handleGetCost() {
+        this.query = {
+          currency: 'USD',
+          productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
+          productPrice: Number(
+            this?.formData?.xssTaskProductBO?.transactionPrice || 0
+          ),
+          reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
+        }
+
+        if (!this.query.productPrice) return
+
+        getTaskCost(this.query)
+          .then((res) => {
+            this.formData.xssTaskCostBO = res
+            this.costDialog = true
+          })
+          .catch((err) => {
+            console.log('==err', err)
+          })
+          .finally((_) => {
+            // 提交按钮loading
+            this.loading.submit = false
+          })
+      },
     },
-    handleGetCost() {
-      this.query = {
-        currency: 'USD',
-        productCount: this?.formData?.xssTaskProductBO?.productCount || 1,
-        productPrice: Number(
-          this?.formData?.xssTaskProductBO?.transactionPrice || 0
-        ),
-        reviewType: this?.formData?.xssTaskDetailBO?.reviewType || 1,
-      }
-
-      if (!this.query.productPrice) return
-
-      getTaskCost(this.query).then((res) => {
-        this.formData.xssTaskCostBO = res
-        this.costDialog = true
-      }).catch(err => {
-        console.log('==err', err)
-      }).finally(_ => {
-        // 提交按钮loading
-        this.loading.submit = false
-      })
-    }
-  },
-}
+  }
 </script>
 
 <style scoped lang="scss">
-.task-list-add {
-  .wrapper-header {
-    margin-bottom: 20px;
-  }
-  .wrapper-container {
-    margin-top: 10px;
-    .el-form-item {
-      .el-input,
-      .el-select,
-      .el-textarea,
-      .el-input-number {
-        width: 90%;
+  .task-list-add {
+    .wrapper-header {
+      margin-bottom: 20px;
+    }
+    .wrapper-container {
+      margin-top: 10px;
+      .el-form-item {
+        .el-input,
+        .el-select,
+        .el-textarea,
+        .el-input-number {
+          width: 90%;
+        }
+      }
+      .form-label {
+        font-size: 16px;
+        color: #1890ff;
+        padding-bottom: 2px;
+        border-bottom: 1px dotted;
+        margin-bottom: 10px;
       }
     }
-    .form-label {
-      font-size: 16px;
-      color: #1890ff;
-      padding-bottom: 2px;
-      border-bottom: 1px dotted;
-      margin-bottom: 10px;
-    }
   }
-}
 
-.el-dialog {
-  .prompt {
-    font-size: 12px;
-    color: #999;
-    background: rgba(31, 50, 82, 0.04);
-    padding: 10px;
-  }
-  .cost-list {
-    margin: 20px 0;
-    .cost-item {
-      font-size: 14px;
-      margin-bottom: 5px;
+  .el-dialog {
+    .prompt {
+      font-size: 12px;
+      color: #999;
+      background: rgba(31, 50, 82, 0.04);
+      padding: 10px;
+    }
+    .cost-list {
+      margin: 20px 0;
+      .cost-item {
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
     }
   }
-}
 </style>

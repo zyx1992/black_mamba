@@ -6,16 +6,15 @@ export function getTaskList(params) {
 }
 
 export function getTaskDetail(id) {
-  return $http.get('/task/detail', {id})
+  return $http.get('/task/detail', { id })
 }
-
 
 export function getTaskType() {
   return taskStatus
 }
 
 export function deleteTask(id) {
-  return $http.delete('/task/list', params)
+  return $http.delete('/sender-task/deletion', {id})
 }
 
 export function getTaskCost(params) {
