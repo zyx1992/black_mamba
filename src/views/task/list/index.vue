@@ -55,14 +55,15 @@
       </el-row>
     </div>
     <div class="ma-task-table">
-      <el-table v-loading="loading.wrapper" :data="list" border @expand-change="handleViewDetail">
+      <el-table v-loading="loading.wrapper"
+                :data="list"
+                border
+                :row-key="getRowKeys"
+                :expand-row-keys="expands"
+                @expand-change="handleViewDetail">
         <el-table-column type="expand">
-          <template #default="props">
-            <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="商品名称">
-                <span>{{ props.row.name }}</span>
-              </el-form-item>
-            </el-form>
+          <template slot-scope="scope">
+            <detail :detail="detailData" :loading="loading.detail"></detail>
           </template>
         </el-table-column>
         <el-table-column prop="taskId" label="任务ID"></el-table-column>
@@ -82,7 +83,6 @@
         <el-table-column prop="createdAt" label="发布时间"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <a @click="handleViewDetail(scope.row)">详情</a>
             <el-popconfirm
               title="确定删除本条任务吗？"
               @confirm="handleDelete(scope.row)"
@@ -114,13 +114,13 @@
     getTaskDetail,
   } from '@/api/ma/task'
   import { taskOriginRules } from '../../const'
-  import DetailDialog from '../components/detailDialog'
+  import Detail from './detail'
 
   export default {
     name: 'List',
     taskOriginRules,
     components: {
-      DetailDialog,
+      Detail,
     },
     data() {
       return {
@@ -146,13 +146,16 @@
         },
         pickerOptions: {
           onPick: ({ maxDate, minDate }) => {
-            console.log('===delete')
             this.query.beginTime = new Date(minDate).getTime()
             this.query.endTime = new Date(maxDate).getTime()
           },
         },
         viewDetail: false,
         detailData: {},
+        getRowKeys(row) {
+          return row.taskId
+        },
+        expands: []
       }
     },
     created() {
@@ -170,11 +173,16 @@
         this.total = res.count
         this.loading.wrapper = false
       },
-      handleViewDetail(row = {}) {
-        console.log('==row', row)
+      async handleViewDetail(row = {}, expandedRows) {
+        if(expandedRows.length) {
+          this.expands = []
+          this.expands.push(row.taskId)
+        }else {
+          this.expands = []
+        }
         let id = row.taskId || ''
         if (!id) return
-        this.handleGetDetail(id)
+        await this.handleGetDetail(id, row)
       },
       async handleDelete(row = {}) {
         this.loading.delete = true
@@ -194,11 +202,9 @@
         getTaskDetail(id)
           .then((res) => {
             this.detailData = res.data || {}
-            this.viewDetail = true
-          })
-          .finally((_) => {
-            this.loading.detail = false
-          })
+          }).finally(_ => {
+          this.loading.detail = false
+        })
       },
       timeChange(val) {
         if(!val) {
