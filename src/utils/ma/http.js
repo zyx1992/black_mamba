@@ -14,7 +14,7 @@ $http.get = (url = '', params = {}, config = {}) => {
   return new Promise((resolve, reject) => {
     Axios.get(url, { params: params, headers })
       .then((res) => {
-        resolve(res.data)
+        resolve(res)
       })
       .catch((err) => {
         Message({
@@ -35,7 +35,7 @@ $http.post = (url = '', params = {}, config = {}) => {
   return new Promise((resolve, reject) => {
     Axios.post(url, params, { headers })
       .then((res) => {
-        resolve(res.data)
+        resolve(res)
       })
       .catch((err) => {
         Message({
@@ -56,7 +56,7 @@ $http.delete = (url = '', params = {}, config = {}) => {
   return new Promise((resolve, reject) => {
     Axios.delete(url, params, { headers })
       .then((res) => {
-        resolve(res.data)
+        resolve(res)
       })
       .catch((err) => {
         Message({
@@ -75,9 +75,9 @@ $http.put = (url = '', params = {}, config = {}) => {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
-    Axios.delete(url, params, { headers })
+    Axios.put(url, params, { headers })
       .then((res) => {
-        resolve(res.data)
+        resolve(res)
       })
       .catch((err) => {
         Message({

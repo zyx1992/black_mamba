@@ -55,8 +55,16 @@
             {{ $options.chargeStatus[scope.row.isConfirm] }}
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="充值时间"></el-table-column>
-        <el-table-column prop="updatedAt" label="审核时间"></el-table-column>
+        <el-table-column prop="createdAt" label="充值时间">
+          <template slot-scope="scope">
+            {{scope.row.createdAt | converTime}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updatedAt" label="审核时间">
+          <template slot-scope="scope">
+            {{scope.row.updatedAt | converTime}}
+          </template>
+        </el-table-column>
       </el-table>
       <el-pagination
         :current-page.sync="query.page"
@@ -71,75 +79,75 @@
 </template>
 
 <script>
-  import { getTaskType, getTaskList, deleteTask } from '@/api/ma/task'
-  import { chargeStatus } from '../../const'
-  import { getRechargeList } from '@/api/ma/wallet'
+import { getTaskType, getTaskList, deleteTask } from '@/api/ma/task'
+import { chargeStatus } from '../../const'
+import { getRechargeList } from '@/api/ma/wallet'
 
-  export default {
-    name: 'Charge',
-    chargeStatus,
-    data() {
-      return {
-        list: [],
-        total: 0,
-        query: {
-          page: 1,
-          limit: 10,
-          userType: 2,
-          isConfirm: '',
-          paymentAccount: '',
-          paymentOrderNo: '',
-        },
-        loading: false,
-      }
-    },
-    created() {
-      this.getList()
-    },
-    methods: {
-      async getList() {
-        this.loading = true
-        getRechargeList(this.query)
-          .then((res) => {
-            console.log('==res', res)
-            this.list = res.data || []
-            this.total = res.count || 0
-          })
-          .finally((_) => {
-            this.loading = false
-          })
+export default {
+  name: 'Charge',
+  chargeStatus,
+  data() {
+    return {
+      list: [],
+      total: 0,
+      query: {
+        page: 1,
+        limit: 10,
+        userType: 2,
+        isConfirm: '',
+        paymentAccount: '',
+        paymentOrderNo: '',
       },
-      handleSizeChange(val) {
-        this.query.limit = val
-      },
-      handleCurrentChange(val) {
-        this.query.page = val
-      },
+      loading: false,
+    }
+  },
+  created() {
+    this.getList()
+  },
+  methods: {
+    async getList() {
+      this.loading = true
+      getRechargeList(this.query)
+        .then((res) => {
+          console.log('==res', res)
+          this.list = res.data || []
+          this.total = res.count || 0
+        })
+        .finally((_) => {
+          this.loading = false
+        })
     },
-  }
+    handleSizeChange(val) {
+      this.query.limit = val
+    },
+    handleCurrentChange(val) {
+      this.query.page = val
+    },
+  },
+}
 </script>
 
 <style lang="scss" scoped>
-  .ma-bill-list {
-    .ma-bill-search {
-      .search-item {
-        margin-top: 10px;
-        .el-input,
-        .el-select {
-          width: 260px;
-          height: 36px;
-        }
-        .search-btn {
-          width: 120px;
-          font-size: 14px;
-        }
+.ma-bill-list {
+  .ma-bill-search {
+    .search-item {
+      margin-top: 10px;
+      .el-input,
+      .el-select {
+        width: 260px;
+        height: 36px;
+      }
+      .search-btn {
+        width: 120px;
+        font-size: 14px;
       }
     }
-    .ma-bill-table {
-      margin-top: 20px;
-    }
-    .el-pagination {
-      text-align: right;
-    }
   }
+  .ma-bill-table {
+    margin-top: 20px;
+  }
+  .el-pagination {
+    text-align: right;
+  }
+}
 </style>

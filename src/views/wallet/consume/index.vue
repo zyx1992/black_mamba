@@ -7,7 +7,11 @@
           prop="expendTypeDescribe"
           label="操作描述"
         ></el-table-column>
-        <el-table-column prop="createdAt" label="时间"></el-table-column>
+        <el-table-column prop="createdAt" label="时间">
+          <template slot-scope="scope">
+            {{scope.row.createdAt | converTime}}
+          </template>
+        </el-table-column>
       </el-table>
       <el-pagination
         :current-page.sync="query.page"
@@ -36,14 +40,15 @@
         loading: false,
       }
     },
-    created() {
-      this.handleGetList()
+    async created() {
+      await this.handleGetList()
     },
     methods: {
       async handleGetList() {
         this.loading = true
         getExpendList(this.query)
           .then((res) => {
+            console.log('===res', res)
             // TODO 替换res[0]
             this.list = res.data || []
             this.total = res.count || 0

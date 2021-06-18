@@ -45,6 +45,7 @@
             <div class="form-label">商品信息</div>
             <el-form-item label="商品链接" prop="xssTaskProductBO.productUrl">
               <el-input
+                id="mHref"
                 v-model="formData.xssTaskProductBO.productUrl"
               ></el-input>
             </el-form-item>
@@ -216,22 +217,40 @@
       </div>
       <div class="cost-list">
         <div class="cost-item">
-          今日汇率：{{ formData.xssTaskCostBO.exchangeRate && formData.xssTaskCostBO.exchangeRate.toFixed(2) }}
+          今日汇率：{{
+            formData.xssTaskCostBO.exchangeRate &&
+            formData.xssTaskCostBO.exchangeRate.toFixed(2)
+          }}
         </div>
         <div class="cost-item">
-          收取本金：{{ formData.xssTaskCostBO.principal && formData.xssTaskCostBO.principal.toFixed(2) }}
+          收取本金：{{
+            formData.xssTaskCostBO.principal &&
+            formData.xssTaskCostBO.principal.toFixed(2)
+          }}
         </div>
         <div class="cost-item">
-          支付手续费：{{ formData.xssTaskCostBO.payPoundage && formData.xssTaskCostBO.payPoundage.toFixed(2) }}
+          支付手续费：{{
+            formData.xssTaskCostBO.payPoundage &&
+            formData.xssTaskCostBO.payPoundage.toFixed(2)
+          }}
         </div>
         <div class="cost-item">
-          基本佣金：{{ formData.xssTaskCostBO.commission && formData.xssTaskCostBO.commission.toFixed(2)}}
+          基本佣金：{{
+            formData.xssTaskCostBO.commission &&
+            formData.xssTaskCostBO.commission.toFixed(2)
+          }}
         </div>
         <div class="cost-item">
-          评论费用：{{ formData.xssTaskCostBO.reviewFee && formData.xssTaskCostBO.reviewFee.toFixed(2)}}
+          评论费用：{{
+            formData.xssTaskCostBO.reviewFee &&
+            formData.xssTaskCostBO.reviewFee.toFixed(2)
+          }}
         </div>
         <div class="cost-item">
-          本单共计金额：{{ formData.xssTaskCostBO.totalAmount && formData.xssTaskCostBO.totalAmount.toFixed(2) }}
+          本单共计金额：{{
+            formData.xssTaskCostBO.totalAmount &&
+            formData.xssTaskCostBO.totalAmount.toFixed(2)
+          }}
         </div>
       </div>
       <div class="operations">
@@ -246,6 +265,7 @@
         <el-button @click="costDialog = false">我再想想</el-button>
       </div>
     </el-dialog>
+    <a id="mBtn" class="aaa bbb">检查</a>
   </div>
 </template>
 
@@ -413,13 +433,15 @@
       },
       handleCreate() {
         this.loading.create = true
-        createTask(this.formData).then((res) => {
-          this.$message('任务发布成功')
-          this.costDialog = false
-          this.$route.push('/task/list')
-        }).finally(_ => {
-          this.loading.create = false
-        })
+        createTask(this.formData)
+          .then((res) => {
+            this.$message('任务发布成功')
+            this.costDialog = false
+            this.$router.push('/task/list')
+          })
+          .finally((_) => {
+            this.loading.create = false
+          })
       },
       handleGetCost() {
         this.query = {

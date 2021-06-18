@@ -37,6 +37,7 @@
         <el-col :span="10">
           日期时间
           <el-date-picker
+            @change="timeChange"
             v-model="query.date"
             type="daterange"
             range-separator="至"
@@ -54,7 +55,16 @@
       </el-row>
     </div>
     <div class="ma-task-table">
-      <el-table v-loading="loading.wrapper" :data="list" border>
+      <el-table v-loading="loading.wrapper" :data="list" border @expand-change="handleViewDetail">
+        <el-table-column type="expand">
+          <template #default="props">
+            <el-form label-position="left" inline class="demo-table-expand">
+              <el-form-item label="商品名称">
+                <span>{{ props.row.name }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <el-table-column prop="taskId" label="任务ID"></el-table-column>
         <el-table-column prop="taskCount" label="任务数量"></el-table-column>
         <el-table-column prop="storeName" label="店铺名称"></el-table-column>
@@ -78,7 +88,7 @@
               @confirm="handleDelete(scope.row)"
             >
               <template #reference>
-              <a class="delete-btn">删除</a>
+                <a class="delete-btn">删除</a>
               </template>
             </el-popconfirm>
           </template>
@@ -93,11 +103,6 @@
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
-    <detail-dialog
-      v-if="viewDetail"
-      v-model="viewDetail"
-      :detail="detailData"
-    />
   </div>
 </template>
 
@@ -141,11 +146,12 @@
         },
         pickerOptions: {
           onPick: ({ maxDate, minDate }) => {
+            console.log('===delete')
             this.query.beginTime = new Date(minDate).getTime()
             this.query.endTime = new Date(maxDate).getTime()
           },
         },
-        viewDetail: true,
+        viewDetail: false,
         detailData: {},
       }
     },
@@ -160,11 +166,12 @@
       async getTaskList() {
         this.loading.wrapper = true
         let res = await getTaskList(this.query)
-        this.list = res.list || [{ taskId: 2 }]
+        this.list = res.data || []
         this.total = res.count
         this.loading.wrapper = false
       },
       handleViewDetail(row = {}) {
+        console.log('==row', row)
         let id = row.taskId || ''
         if (!id) return
         this.handleGetDetail(id)
@@ -193,6 +200,12 @@
             this.loading.detail = false
           })
       },
+      timeChange(val) {
+        if(!val) {
+          this.query.beginTime = ''
+          this.query.endTime = ''
+        }
+      }
     },
   }
 </script>

@@ -134,7 +134,8 @@
         this.$refs['registerForm'].validate(async (valid) => {
           if (valid) {
             this.loading = true
-            let { signKey } = await getUserRsa({ username: this.form.username })
+            let res = await getUserRsa({ username: this.form.username })
+            let {signKey} = res.data
             let password = encodeURIComponent(
               handleRsaPassword(signKey, this.form.password)
             )

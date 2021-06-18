@@ -44,10 +44,10 @@
             <div>最少充值金额20元</div>
           </el-form-item>
           <!--<el-form-item label="今日汇率">-->
-            <!--<span>{{ rate }}元</span>-->
+          <!--<span>{{ rate }}元</span>-->
           <!--</el-form-item>-->
           <!--<el-form-item label="所需人民币">-->
-            <!--<span class="point">100元</span>-->
+          <!--<span class="point">100元</span>-->
           <!--</el-form-item>-->
           <el-form-item label="充值方式">
             <div>图</div>
@@ -132,8 +132,9 @@
         this.loading = true
         getUserAccount()
           .then((res) => {
-            this.total = res.balance || 0
-            this.frezze = res.freezeAmount || 0
+            let {data} = res
+            this.total = data.balance || 0
+            this.frezze = data.freezeAmount || 0
           })
           .finally((_) => {
             this.loading = false
@@ -159,9 +160,9 @@
         this.query = {
           topUpAmount: null,
           paymentAccount: '',
-          paymentOrderNo: ''
+          paymentOrderNo: '',
         }
-      }
+      },
     },
   }
 </script>

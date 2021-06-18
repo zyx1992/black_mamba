@@ -150,16 +150,18 @@
           if (valid) {
             this.loading = true
             let params = Object.assign({}, this.form)
-            let { signKey } = await getUserRsa({ username: this.form.username })
+            let res = await getUserRsa({ username: this.form.username })
+            let {signKey} = res.data
             params.password = encodeURIComponent(
               handleRsaPassword(signKey, this.form.password)
             )
             singin(params)
               .then((res) => {
+                let {data} = res || {}
                 this.$baseNotify(`欢迎登录${title}`)
                 this.$store.dispatch(
                   'common/getAccessToken',
-                  res['access_token']
+                  data['access_token']
                 )
                 this.$router.push(`/index`)
               })
