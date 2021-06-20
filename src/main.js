@@ -14,8 +14,8 @@ if (process.env.NODE_ENV === 'production') {
   const { mockXHR } = require('@/utils/static')
   mockXHR()
 }
-Vue.filter('converTime',function(data,formatStr){
-  return Moment(data).format('YYYY-MM-DD HH:mm:ss');
+Vue.filter('converTime', function (data) {
+  return Moment(data).format('YYYY-MM-DD HH:mm:ss')
 })
 Vue.config.productionTip = false
 Window.aaa = 1
