@@ -37,7 +37,7 @@ const actions = {
     commit('setAccessToken', token)
   },
   async getUserInfo({ commit }) {
-    const {data} = await userInfo()
+    const { data } = await userInfo()
     commit('setUsername', data.username)
   },
   async logout({ dispatch }) {

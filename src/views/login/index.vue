@@ -12,16 +12,19 @@
           class="login-form"
           label-position="left"
         >
-          <div class="title">hello !</div>
-          <div class="title-tips">欢迎来到{{ title }}！</div>
-          <el-form-item style="margin-top: 40px" prop="username">
+          <div class="title">登录</div>
+          <div class="title-tips">
+            没有账户，
+            <router-link to="/register">我要注册 ></router-link>
+          </div>
+          <el-form-item prop="username">
             <span class="svg-container svg-container-admin">
               <vab-icon :icon="['fas', 'user']" />
             </span>
             <el-input
               v-model.trim="form.username"
               v-focus
-              placeholder="请输入用户名"
+              placeholder="请输入手机号"
               tabindex="1"
               type="text"
             />
@@ -58,9 +61,6 @@
           >
             登录
           </el-button>
-          <router-link to="/register">
-            <div style="margin-top: 20px">注册</div>
-          </router-link>
         </el-form>
       </el-col>
     </el-row>
@@ -151,19 +151,22 @@
             this.loading = true
             let params = Object.assign({}, this.form)
             let res = await getUserRsa({ username: this.form.username })
-            let {signKey} = res.data
+            let { signKey } = res.data
             params.password = encodeURIComponent(
               handleRsaPassword(signKey, this.form.password)
             )
             singin(params)
               .then((res) => {
-                let {data} = res || {}
-                this.$baseNotify(`欢迎登录${title}`)
+                let { data } = res || {}
                 this.$store.dispatch(
                   'common/getAccessToken',
                   data['access_token']
                 )
-                this.$router.push(`/index`)
+                this.$router.push(`/`)
+                this.$baseNotify(`登录成功`)
+              })
+              .catch((err) => {
+                this.$baseMessage('用户名或密码输入错误，请检查', 'error')
               })
               .finally(() => {
                 this.loading = false
@@ -185,24 +188,24 @@
     background-size: cover;
 
     .title {
-      font-size: 54px;
+      font-size: 24px;
       font-weight: 500;
       color: rgba(14, 18, 26, 1);
     }
 
     .title-tips {
-      margin-top: 29px;
-      font-size: 26px;
+      margin-top: 8px;
+      font-size: 14px;
       font-weight: 400;
-      color: rgba(14, 18, 26, 1);
+      color: #626f85;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .login-btn {
       display: inherit;
-      width: 220px;
-      height: 60px;
+      width: 100%;
+      height: 40px;
       margin-top: 5px;
       border: 0;
 
@@ -258,23 +261,25 @@
 
     .svg-container {
       position: absolute;
-      top: 14px;
+      top: 0;
       left: 15px;
       z-index: $base-z-index;
-      font-size: 16px;
       color: #d7dee3;
       cursor: pointer;
       user-select: none;
+      line-height: 40px;
+      font-size: 14px;
     }
 
     .show-password {
       position: absolute;
-      top: 14px;
+      top: 0;
       right: 25px;
-      font-size: 16px;
       color: #d7dee3;
       cursor: pointer;
       user-select: none;
+      line-height: 40px;
+      font-size: 14px;
     }
 
     ::v-deep {
@@ -294,7 +299,6 @@
         &__error {
           position: absolute;
           top: 100%;
-          left: 18px;
           font-size: $base-font-size-small;
           line-height: 18px;
           color: $base-color-red;
@@ -304,14 +308,29 @@
       .el-input {
         box-sizing: border-box;
 
+        .el-input__count {
+          .el-input__count-inner {
+            background: transparent;
+          }
+        }
+
+        .el-input__prefix {
+          left: 15px;
+          line-height: 40px;
+
+          .svg-inline--fa {
+            width: 20px;
+          }
+        }
+
         input {
-          height: 58px;
+          height: 40px;
           padding-left: 45px;
-          font-size: $base-font-size-default;
-          line-height: 58px;
+          font-size: 14px;
+          line-height: 40px;
           color: $base-font-color;
-          background: #f6f4fc;
-          border: 0;
+          background: #fff;
+          border-color: #dbdee3;
           caret-color: $base-font-color;
         }
       }

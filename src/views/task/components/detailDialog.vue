@@ -10,14 +10,22 @@
         <el-col :span="12">
           <div class="detail-item-label">任务信息</div>
           <div class="detail-item">
-            <div class="content">任务名称：{{ xssTaskVO && xssTaskVO.taskId }}</div>
-            <div class="content">任务备注：{{ xssTaskVO && xssTaskVO.remark }}</div>
+            <div class="content">
+              任务名称：{{ xssTaskVO && xssTaskVO.taskId }}
+            </div>
+            <div class="content">
+              任务备注：{{ xssTaskVO && xssTaskVO.remark }}
+            </div>
             <div class="content">用户昵称：</div>
           </div>
           <div class="detail-item-label">任务信息</div>
           <div class="detail-item">
-            <div class="content">任务名称：{{ xssTaskVO && xssTaskVO.taskId }}</div>
-            <div class="content">任务备注：{{ xssTaskVO && xssTaskVO.remark }}</div>
+            <div class="content">
+              任务名称：{{ xssTaskVO && xssTaskVO.taskId }}
+            </div>
+            <div class="content">
+              任务备注：{{ xssTaskVO && xssTaskVO.remark }}
+            </div>
             <div class="content">用户昵称：</div>
           </div>
         </el-col>

@@ -16,7 +16,7 @@
         <div class="right-panel">
           <router-link class="fe" to="/task/add">发布任务</router-link>
           <router-link class="fe" to="/wallet/recharge">充值</router-link>
-          <router-link class="fe" to="/">帮助</router-link>
+          <!--          <router-link class="fe" to="/">帮助</router-link>-->
           <vab-avatar />
         </div>
       </el-col>

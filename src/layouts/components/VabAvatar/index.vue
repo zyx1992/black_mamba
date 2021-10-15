@@ -1,22 +1,29 @@
 <template>
-  <el-dropdown @command="handleCommand">
-    <span class="avatar-dropdown">
-      <div class="user-name">
-        {{ username }}
-        <i class="el-icon-arrow-down el-icon--right"></i>
-      </div>
-    </span>
+  <div>
+    <el-dropdown @command="handleCommand">
+      <span class="avatar-dropdown">
+        <div class="user-name">
+          {{ username }}
+          <i class="el-icon-arrow-down el-icon--right"></i>
+        </div>
+      </span>
 
-    <el-dropdown-menu slot="dropdown">
-      <el-dropdown-item command="password" divided>修改密码</el-dropdown-item>
-      <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
-    </el-dropdown-menu>
-  </el-dropdown>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item command="password" divided>修改密码</el-dropdown-item>
+        <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+    <ChangePassword
+      :show="showDialog"
+      @close="showDialog = false"
+    ></ChangePassword>
+  </div>
 </template>
 
 <script>
   import { mapGetters } from 'vuex'
   import { recordRoute } from '@/config'
+  import ChangePassword from '../../../views/login/changePassword'
 
   export default {
     name: 'VabAvatar',
@@ -25,6 +32,14 @@
         username: 'common/username',
       }),
     },
+    components: {
+      ChangePassword,
+    },
+    data() {
+      return {
+        showDialog: false,
+      }
+    },
     methods: {
       handleCommand(command) {
         switch (command) {
@@ -32,7 +47,7 @@
             this.logout()
             break
           case 'password':
-            console.log('==更改密码')
+            this.showDialog = true
             break
         }
       },

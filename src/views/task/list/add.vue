@@ -73,12 +73,19 @@
               </el-input>
             </el-form-item>
             <el-form-item label="商品规格">
-              <div>Color:</div>
-              <el-input v-model="formData.color"></el-input>
-              <div class="color-list"></div>
-              <div>Options:</div>
-              <el-input v-model="formData.options"></el-input>
-              <div class="options-list"></div>
+              <el-input
+                v-model="formData.xssTaskProductBO.productVariant"
+              ></el-input>
+              <div
+                style="
+                  font-size: 12px;
+                  color: #999;
+                  line-height: 20px;
+                  width: 90%;
+                "
+              >
+                请填写商品规格，填写格式如：color:blue_options:iphone12(5.4)，即【颜色为蓝色，机型为iphone12】
+              </div>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -227,30 +234,35 @@
             formData.xssTaskCostBO.principal &&
             formData.xssTaskCostBO.principal.toFixed(2)
           }}
+          元
         </div>
         <div class="cost-item">
           支付手续费：{{
             formData.xssTaskCostBO.payPoundage &&
             formData.xssTaskCostBO.payPoundage.toFixed(2)
           }}
+          元
         </div>
         <div class="cost-item">
           基本佣金：{{
             formData.xssTaskCostBO.commission &&
             formData.xssTaskCostBO.commission.toFixed(2)
           }}
+          元
         </div>
         <div class="cost-item">
           评论费用：{{
             formData.xssTaskCostBO.reviewFee &&
             formData.xssTaskCostBO.reviewFee.toFixed(2)
           }}
+          元
         </div>
         <div class="cost-item">
           本单共计金额：{{
             formData.xssTaskCostBO.totalAmount &&
             formData.xssTaskCostBO.totalAmount.toFixed(2)
           }}
+          元
         </div>
       </div>
       <div class="operations">
@@ -265,7 +277,6 @@
         <el-button @click="costDialog = false">我再想想</el-button>
       </div>
     </el-dialog>
-    <a id="mBtn" class="aaa bbb">检查</a>
   </div>
 </template>
 
@@ -282,7 +293,7 @@
     commentRequire,
     stars,
   } from '../../const'
-  import { getTaskCost, createTask, getTaskDetail } from '@/api/ma/task'
+  import { getTaskCost, createTask } from '@/api/ma/task'
 
   export default {
     name: 'Add',
@@ -348,7 +359,7 @@
             taskTerminal: 1,
           },
           xssTaskProductBO: {
-            itemcode: 123123, // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
+            itemcode: '', // TODO: 产品编号是什么？在哪里取？怎么填充？是个必填！！！
             productUrl: '',
             storeName: '',
             transactionPrice: null,
@@ -419,22 +430,33 @@
     methods: {
       handleSubmit() {
         this.$refs.addForm.validate(async (valid) => {
-          this.loading.submit = true
-
-          console.log('formData', this.formData)
-          // 处理参数
-          this.formData.xssTaskProductBO.productVariant =
-            this.formData.color + '_' + this.formData.options
-          delete this.formData.color
-          delete this.formData.options
-          // 查询费用
-          this.handleGetCost()
+          if (valid) {
+            this.loading.submit = true
+            // 处理参数
+            // this.formData.xssTaskProductBO.productVariant =
+            //   this.formData.color + '_' + this.formData.options
+            this.formData.xssTaskProductBO.productVariant = ''
+            delete this.formData.color
+            delete this.formData.options
+            // 自动填充itemcode
+            const code =
+              (this.formData.xssTaskProductBO.productUrl &&
+                this.formData.xssTaskProductBO.productUrl.split('/')) ||
+              []
+            const lastCode = code[code.length - 1] || ''
+            const codeArr = lastCode.split('.html') || []
+            if (codeArr[0]) {
+              this.formData.xssTaskProductBO.itemcode = codeArr[0]
+            }
+            // 查询费用
+            this.handleGetCost()
+          }
         })
       },
       handleCreate() {
-        this.loading.create = true
         createTask(this.formData)
           .then((res) => {
+            this.loading.create = true
             this.$message('任务发布成功')
             this.costDialog = false
             this.$router.push('/task/list')
@@ -457,11 +479,8 @@
 
         getTaskCost(this.query)
           .then((res) => {
-            this.formData.xssTaskCostBO = res
+            this.formData.xssTaskCostBO = res.data
             this.costDialog = true
-          })
-          .catch((err) => {
-            console.log('==err', err)
           })
           .finally((_) => {
             // 提交按钮loading
@@ -477,8 +496,10 @@
     .wrapper-header {
       margin-bottom: 20px;
     }
+
     .wrapper-container {
       margin-top: 10px;
+
       .el-form-item {
         .el-input,
         .el-select,
@@ -487,6 +508,7 @@
           width: 90%;
         }
       }
+
       .form-label {
         font-size: 16px;
         color: #1890ff;
@@ -504,8 +526,10 @@
       background: rgba(31, 50, 82, 0.04);
       padding: 10px;
     }
+
     .cost-list {
       margin: 20px 0;
+
       .cost-item {
         font-size: 14px;
         margin-bottom: 5px;

@@ -3,48 +3,66 @@
     <div class="ma-task-search">
       <el-row class="search-item">
         <el-col :span="8">
-          店铺名称
+          <span class="search-title">店铺名称</span>
           <el-input
             v-model="query.storeName"
             size="medium"
             placeholder="请填写店铺名称"
-          ></el-input>
+            clearable
+            @clear="getTaskList"
+            @keyup.enter.native="getTaskList"
+          />
         </el-col>
         <el-col :span="8">
-          产品编号
+          <span class="search-title">产品编号</span>
           <el-input
             v-model="query.itemcode"
             placeholder="请填写产品编号"
-          ></el-input>
+            clearable
+            @clear="getTaskList"
+            @keyup.enter.native="getTaskList"
+          />
         </el-col>
         <el-col :span="8">
-          订单编号
-          <el-input v-model="query.taskId" placeholder="请填订单号"></el-input>
+          <span class="search-title">订单编号</span>
+          <el-input
+            v-model="query.taskId"
+            placeholder="请填订单号"
+            clearable
+            @clear="getTaskList"
+            @keyup.enter.native="getTaskList"
+          />
         </el-col>
       </el-row>
       <el-row class="search-item">
         <el-col :span="8">
-          状态类型
-          <el-select v-model="query.taskStatus">
+          <span class="search-title">状态类型</span>
+          <el-select
+            v-model="query.taskStatus"
+            clearable
+            @change="getTaskList"
+            @clear="getTaskList"
+          >
             <el-option
               v-for="item in Object.keys(typeList)"
               :key="item"
               :label="typeList[item]"
-              :value="item"
+              :value="Number(item)"
             ></el-option>
           </el-select>
         </el-col>
         <el-col :span="10">
-          日期时间
+          <span class="search-title">日期时间</span>
           <el-date-picker
-            @change="timeChange"
             v-model="query.date"
+            clearable
             type="daterange"
             range-separator="至"
             value-format="timestamp"
             :picker-options="pickerOptions"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
+            @change="timeChange"
           ></el-date-picker>
         </el-col>
         <el-col :span="6">
@@ -55,21 +73,26 @@
       </el-row>
     </div>
     <div class="ma-task-table">
-      <el-table v-loading="loading.wrapper"
-                :data="list"
-                border
-                :row-key="getRowKeys"
-                :expand-row-keys="expands"
-                @expand-change="handleViewDetail">
+      <el-table
+        v-loading="loading.wrapper"
+        :data="list"
+        border
+        :row-key="getRowKeys"
+        :expand-row-keys="expands"
+        @expand-change="handleViewDetail"
+      >
         <el-table-column type="expand">
-          <template slot-scope="scope">
+          <template>
             <detail :detail="detailData" :loading="loading.detail"></detail>
           </template>
         </el-table-column>
         <el-table-column prop="taskId" label="任务ID"></el-table-column>
         <el-table-column prop="taskCount" label="任务数量"></el-table-column>
         <el-table-column prop="storeName" label="店铺名称"></el-table-column>
-        <el-table-column prop="totalAmount" label="任务费用"></el-table-column>
+        <el-table-column
+          prop="totalAmount"
+          label="任务费用（元)"
+        ></el-table-column>
         <el-table-column prop="routeReq" label="任务要求">
           <template slot-scope="scope">
             {{ $options.taskOriginRules[scope.row.routeReq] }}
@@ -146,8 +169,8 @@
         },
         pickerOptions: {
           onPick: ({ maxDate, minDate }) => {
-            this.query.beginTime = new Date(minDate).getTime()
-            this.query.endTime = new Date(maxDate).getTime()
+            this.query.beginTime = minDate
+            this.query.endTime = maxDate
           },
         },
         viewDetail: false,
@@ -155,7 +178,7 @@
         getRowKeys(row) {
           return row.taskId
         },
-        expands: []
+        expands: [],
       }
     },
     created() {
@@ -174,10 +197,10 @@
         this.loading.wrapper = false
       },
       async handleViewDetail(row = {}, expandedRows) {
-        if(expandedRows.length) {
+        if (expandedRows.length) {
           this.expands = []
           this.expands.push(row.taskId)
-        }else {
+        } else {
           this.expands = []
         }
         let id = row.taskId || ''
@@ -185,33 +208,40 @@
         await this.handleGetDetail(id, row)
       },
       async handleDelete(row = {}) {
-        this.loading.delete = true
-        await deleteTask(row.taskId)
-        this.$baseMessage('删除成功', 'success')
-        this.loading.delete = false
-        this.getTaskList()
+        try {
+          this.loading.delete = true
+          await deleteTask(row.taskId)
+          this.$baseMessage('删除成功', 'success')
+          this.getTaskList()
+        } finally {
+          this.loading.delete = false
+        }
       },
       handleSizeChange(val) {
         this.query.limit = val
+        this.getTaskList()
       },
       handleCurrentChange(val) {
         this.query.page = val
+        this.getTaskList()
       },
       handleGetDetail(id) {
         this.loading.detail = true
         getTaskDetail(id)
           .then((res) => {
             this.detailData = res.data || {}
-          }).finally(_ => {
-          this.loading.detail = false
-        })
+          })
+          .finally((_) => {
+            this.loading.detail = false
+          })
       },
       timeChange(val) {
-        if(!val) {
+        if (!val) {
           this.query.beginTime = ''
           this.query.endTime = ''
         }
-      }
+        this.getTaskList()
+      },
     },
   }
 </script>
@@ -221,24 +251,33 @@
     .ma-task-search {
       .search-item {
         margin-top: 10px;
+
+        .search-title {
+          margin-right: 8px;
+        }
+
         .el-input,
         .el-select {
           width: 260px;
           height: 36px;
         }
+
         .search-btn {
           width: 120px;
           font-size: 14px;
         }
       }
     }
+
     .ma-task-table {
       margin-top: 20px;
+
       .delete-btn {
         margin-left: 5px;
         color: red;
       }
     }
+
     .el-pagination {
       text-align: right;
     }

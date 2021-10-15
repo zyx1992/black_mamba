@@ -6,9 +6,20 @@ const $http = {}
 
 // 不需要bearer的请求path
 const whitePath = ['/common/lander', '/common/sign', '/sender/register']
+// 不需要展示错误消息的接口
+const noErrorMesg = ['/common/lander']
+const errorMessage = (url, err) => {
+  if (!noErrorMesg.includes(url)) {
+    Message({
+      message: err,
+      type: 'error',
+      duration: 5 * 1000,
+    })
+  }
+}
 $http.get = (url = '', params = {}, config = {}) => {
   let headers = {}
-  if (whitePath.indexOf(url) < 0) {
+  if (!whitePath.includes(url)) {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
@@ -17,11 +28,7 @@ $http.get = (url = '', params = {}, config = {}) => {
         resolve(res)
       })
       .catch((err) => {
-        Message({
-          message: err,
-          type: 'error',
-          duration: 5 * 1000,
-        })
+        errorMessage(url, err)
         reject(err)
       })
   })
@@ -29,7 +36,7 @@ $http.get = (url = '', params = {}, config = {}) => {
 
 $http.post = (url = '', params = {}, config = {}) => {
   let headers = {}
-  if (whitePath.indexOf(url) < 0) {
+  if (!whitePath.includes(url)) {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
@@ -38,11 +45,7 @@ $http.post = (url = '', params = {}, config = {}) => {
         resolve(res)
       })
       .catch((err) => {
-        Message({
-          message: err,
-          type: 'error',
-          duration: 5 * 1000,
-        })
+        errorMessage(url, err)
         reject(err)
       })
   })
@@ -50,7 +53,7 @@ $http.post = (url = '', params = {}, config = {}) => {
 
 $http.delete = (url = '', params = {}, config = {}) => {
   let headers = {}
-  if (whitePath.indexOf(url) < 0) {
+  if (!whitePath.includes(url)) {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
@@ -59,11 +62,7 @@ $http.delete = (url = '', params = {}, config = {}) => {
         resolve(res)
       })
       .catch((err) => {
-        Message({
-          message: err,
-          type: 'error',
-          duration: 5 * 1000,
-        })
+        errorMessage(url, err)
         reject(err)
       })
   })
@@ -71,7 +70,7 @@ $http.delete = (url = '', params = {}, config = {}) => {
 
 $http.put = (url = '', params = {}, config = {}) => {
   let headers = {}
-  if (whitePath.indexOf(url) < 0) {
+  if (!whitePath.includes(url)) {
     headers['Authorization'] = `Bearer ${getAccessToken('access_token')}`
   }
   return new Promise((resolve, reject) => {
@@ -80,11 +79,7 @@ $http.put = (url = '', params = {}, config = {}) => {
         resolve(res)
       })
       .catch((err) => {
-        Message({
-          message: err,
-          type: 'error',
-          duration: 5 * 1000,
-        })
+        errorMessage(url, err)
         reject(err)
       })
   })

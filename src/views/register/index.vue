@@ -12,35 +12,40 @@
           :rules="registerRules"
           size="mini"
         >
+          <div class="title">免费注册</div>
+          <div class="title-tips">
+            已有账户，
+            <router-link to="/login">我要登录 ></router-link>
+          </div>
           <el-form-item prop="username">
             <el-input
               v-model.trim="form.username"
               v-focus
-              style="margin-top: 20px"
-              type="text"
-              placeholder="请输入用户名"
-              auto-complete="off"
-            >
-              <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
-            </el-input>
-          </el-form-item>
-          <el-form-item prop="phone">
-            <el-input
-              v-model.trim="form.phone"
               type="text"
               placeholder="请输入手机号"
               maxlength="11"
               show-word-limit
               autocomplete="off"
             >
-              <vab-icon slot="prefix" :icon="['fas', 'mobile-alt']"></vab-icon>
+              <vab-icon slot="prefix" :icon="['fas', 'user-alt']"></vab-icon>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input
               v-model.trim="form.password"
               type="password"
-              placeholder="设置密码"
+              minlength="6"
+              placeholder="输入密码（必填）"
+              autocomplete="new-password"
+            >
+              <vab-icon slot="prefix" :icon="['fas', 'unlock']"></vab-icon>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="rPassword">
+            <el-input
+              v-model.trim="form.rPassword"
+              type="password"
+              placeholder="确认密码（必填）"
               autocomplete="new-password"
             >
               <vab-icon slot="prefix" :icon="['fas', 'unlock']"></vab-icon>
@@ -54,9 +59,6 @@
             >
               注册
             </el-button>
-            <router-link to="/login">
-              <div style="margin-top: 20px">登录</div>
-            </router-link>
           </el-form-item>
         </el-form>
       </el-col>
@@ -79,13 +81,6 @@
       },
     },
     data() {
-      const validateusername = (rule, value, callback) => {
-        if ('' == value) {
-          callback(new Error('用户名不能为空'))
-        } else {
-          callback()
-        }
-      }
       const validatePassword = (rule, value, callback) => {
         if (!isPassword(value)) {
           callback(new Error('密码不能少于6位'))
@@ -101,21 +96,37 @@
           callback()
         }
       }
+      const validateRPassword = (rule, value, callback) => {
+        const { password } = this.form
+        if (!password) {
+          return callback(new Error('请输入密码'))
+        }
+        if (password !== value) {
+          return callback(new Error('两次密码输入不一致'))
+        }
+        callback()
+      }
       return {
         getPhoneIntval: null,
         showRegister: false,
         title: this.$baseTitle,
-        form: {},
+        form: {
+          username: '',
+          password: '',
+          rPassword: '',
+        },
         registerRules: {
           username: [
             { required: true, trigger: 'blur', message: '请输入用户名' },
-            { min: 6, trigger: 'blur', message: '用户名最少6位' },
-            { validator: validateusername, trigger: 'blur' },
+            { validator: validatePhone, trigger: 'blur' },
           ],
-          phone: [{ validator: validatePhone, trigger: 'blur' }],
           password: [
             { required: true, trigger: 'blur', message: '请输入密码' },
-            { validator: validatePassword, trigger: 'blur' },
+            { validator: validatePassword, trigger: ' ' },
+          ],
+          rPassword: [
+            { required: true, trigger: ' ', message: '请输入确认密码' },
+            { validator: validateRPassword, trigger: ' ' },
           ],
         },
         loading: false,
@@ -135,7 +146,7 @@
           if (valid) {
             this.loading = true
             let res = await getUserRsa({ username: this.form.username })
-            let {signKey} = res.data
+            let { signKey } = res.data
             let password = encodeURIComponent(
               handleRsaPassword(signKey, this.form.password)
             )
@@ -146,9 +157,13 @@
               userType: '2',
             }
             signup(param)
-              .then((res) => {
+              .then((data) => {
                 this.$baseNotify(`欢迎登录${title}`)
-                this.$store.commit('common/setAccessToken', res['access_token'])
+                this.$store.dispatch(
+                  'common/getAccessToken',
+                  data['access_token']
+                )
+                this.$router.push(`/`)
               })
               .finally((_) => {
                 this.loading = false
@@ -167,24 +182,24 @@
     background-size: cover;
 
     .title {
-      font-size: 54px;
+      font-size: 24px;
       font-weight: 500;
       color: rgba(14, 18, 26, 1);
     }
 
     .title-tips {
-      margin-top: 29px;
-      font-size: 26px;
+      margin-top: 8px;
+      font-size: 14px;
       font-weight: 400;
-      color: rgba(14, 18, 26, 1);
+      color: #626f85;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .register-btn {
       display: inherit;
-      width: 220px;
-      height: 60px;
+      width: 100%;
+      height: 40px;
       margin-top: 5px;
       border: 0;
 
@@ -295,7 +310,6 @@
         &__error {
           position: absolute;
           top: 100%;
-          left: 18px;
           font-size: $base-font-size-small;
           line-height: 18px;
           color: $base-color-red;
@@ -313,7 +327,7 @@
 
         .el-input__prefix {
           left: 15px;
-          line-height: 56px;
+          line-height: 40px;
 
           .svg-inline--fa {
             width: 20px;
@@ -321,13 +335,13 @@
         }
 
         input {
-          height: 58px;
+          height: 40px;
           padding-left: 45px;
-          font-size: $base-font-size-default;
-          line-height: 58px;
+          font-size: 14px;
+          line-height: 40px;
           color: $base-font-color;
-          background: #f6f4fc;
-          border: 0;
+          background: #fff;
+          border-color: #dbdee3;
           caret-color: $base-font-color;
         }
       }

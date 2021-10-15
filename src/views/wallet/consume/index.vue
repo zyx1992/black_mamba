@@ -2,14 +2,18 @@
   <div class="ma-wallet-consume">
     <div class="ma-consume-table">
       <el-table v-loading="loading" :data="list" border>
-        <el-table-column prop="amount" label="金额"></el-table-column>
+        <el-table-column prop="amount" label="金额(元)">
+          <template slot-scope="scope">
+            {{ Number(scope.row.amount).toFixed(2) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="expendTypeDescribe"
           label="操作描述"
         ></el-table-column>
         <el-table-column prop="createdAt" label="时间">
           <template slot-scope="scope">
-            {{scope.row.createdAt | converTime}}
+            {{ scope.row.createdAt | converTime }}
           </template>
         </el-table-column>
       </el-table>
@@ -48,7 +52,6 @@
         this.loading = true
         getExpendList(this.query)
           .then((res) => {
-            console.log('===res', res)
             // TODO 替换res[0]
             this.list = res.data || []
             this.total = res.count || 0
@@ -59,9 +62,11 @@
       },
       handleSizeChange(val) {
         this.query.limit = val
+        this.handleGetList()
       },
       handleCurrentChange(val) {
         this.query.page = val
+        this.handleGetList()
       },
     },
   }

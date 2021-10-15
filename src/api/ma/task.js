@@ -14,7 +14,7 @@ export function getTaskType() {
 }
 
 export function deleteTask(id) {
-  return $http.delete('/sender-task/deletion', { id })
+  return $http.delete(`/sender-task/deletion/${id}`)
 }
 
 export function getTaskCost(params) {

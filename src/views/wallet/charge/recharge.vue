@@ -38,29 +38,24 @@
         >
           <el-form-item label="充值金额" prop="topUpAmount">
             <el-input
-              v-model="query.topUpAmount"
+              v-model="formData.topUpAmount"
               placeholder="请输入充值金额（元）"
             ></el-input>
-            <div>最少充值金额20元</div>
+            <div style="font-size: 12px; color: #999">最少充值金额20元</div>
           </el-form-item>
-          <!--<el-form-item label="今日汇率">-->
-          <!--<span>{{ rate }}元</span>-->
-          <!--</el-form-item>-->
-          <!--<el-form-item label="所需人民币">-->
-          <!--<span class="point">100元</span>-->
-          <!--</el-form-item>-->
           <el-form-item label="充值方式">
             <div>图</div>
           </el-form-item>
           <el-form-item label="付款账号" prop="paymentAccount">
             <el-input
-              v-model="query.paymentAccount"
+              v-model="formData.paymentAccount"
+              required
               placeholder="请输入付款账号"
             ></el-input>
           </el-form-item>
           <el-form-item label="支付宝订单号" prop="paymentOrderNo">
             <el-input
-              v-model="query.paymentOrderNo"
+              v-model="formData.paymentOrderNo"
               placeholder="请输入支付宝订单号"
             ></el-input>
           </el-form-item>
@@ -83,13 +78,18 @@
 
 <script>
   import { getUserAccount, setPayment } from '@/api/ma/wallet'
+
   export default {
     name: 'Recharge',
     data() {
       return {
         total: 100,
         frezze: 10,
-        formData: {},
+        formData: {
+          topUpAmount: null,
+          paymentAccount: '',
+          paymentOrderNo: '',
+        },
         rate: 6.8,
         loading: false,
         btnLoading: false,
@@ -101,22 +101,31 @@
         rules: {
           topUpAmount: [
             {
-              required: false,
+              required: true,
               trigger: 'blur',
-              //              min: 20,
-              message: '充值金额不能小于20元',
+              message: '请输入金额',
+            },
+            {
+              trigger: 'blur',
+              validator: (rule, value, callback) => {
+                if (value < 20) {
+                  callback(new Error('最少充值金额20元'))
+                } else {
+                  callback()
+                }
+              },
             },
           ],
           paymentAccount: [
             {
-              required: false,
+              required: true,
               trigger: 'blur',
               message: '请输入付款账号',
             },
           ],
           paymentOrderNo: [
             {
-              required: false,
+              required: true,
               trigger: 'blur',
               message: '请输入支付宝订单号',
             },
@@ -132,7 +141,7 @@
         this.loading = true
         getUserAccount()
           .then((res) => {
-            let {data} = res
+            let { data } = res
             this.total = data.balance || 0
             this.frezze = data.freezeAmount || 0
           })
@@ -144,7 +153,7 @@
         this.$refs.payForm.validate(async (valid) => {
           if (valid) {
             this.btnLoading = true
-            setPayment(this.query)
+            setPayment(this.formData)
               .then((res) => {
                 this.$message.success('提交成功，请等待充值审核')
                 this.getUserInfo()
@@ -157,11 +166,7 @@
         })
       },
       handleReset() {
-        this.query = {
-          topUpAmount: null,
-          paymentAccount: '',
-          paymentOrderNo: '',
-        }
+        this.formData = Object.assign({}, this.query)
       },
     },
   }
@@ -170,30 +175,36 @@
 <style lang="scss" scoped>
   .ma-recharge {
     font-size: 14px;
+
     .point {
       color: orange;
       font-size: 20px;
       font-weight: bold;
     }
+
     .prompt {
       padding: 10px;
       margin: 10px 0;
       background: rgba(31, 50, 82, 0.04);
       color: #999;
+
       li {
         font-size: 12px;
         line-height: 16px;
       }
+
       .prompt-title {
         color: red;
         font-size: 16px;
       }
     }
+
     .el-form {
       .el-input {
         width: 400px;
       }
     }
+
     .recharge-container {
       .title {
         font-size: 20px;
