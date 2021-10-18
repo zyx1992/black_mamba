@@ -83,8 +83,11 @@
       >
         <el-table-column type="expand">
           <template slot-scope="scope">
-            <div v-if="false">{{ scope }}</div>
-            <detail :detail="detailData" :loading="loading.detail"></detail>
+            <detail
+              :detail="detailData"
+              :loading="loading.detail"
+              :row="scope"
+            ></detail>
           </template>
         </el-table-column>
         <el-table-column prop="taskId" label="任务ID"></el-table-column>
