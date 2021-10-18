@@ -82,7 +82,8 @@
         @expand-change="handleViewDetail"
       >
         <el-table-column type="expand">
-          <template>
+          <template slot-scope="scope">
+            <div v-if="false">{{ scope }}</div>
             <detail :detail="detailData" :loading="loading.detail"></detail>
           </template>
         </el-table-column>
